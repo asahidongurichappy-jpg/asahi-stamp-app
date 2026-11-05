@@ -1,0 +1,277 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-/YvER1uFq1yBmrur0+gecXe2O5EJRWVRMhO191uYqWw='; style-src 'sha256-9rjFzHxN3iPtxOJZxtm+u75BSinW0hpVSYY8uazFs2I='; img-src blob: data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"><title>アサヒのスタンプ工房</title><style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#263b32;background:#f3f2e9;line-height:1.7}body{margin:0}main{max-width:1000px;margin:auto;padding:24px}header{padding:28px 0}header p:first-child{font-size:12px;letter-spacing:.18em;color:#527660}h1{font-size:clamp(30px,7vw,48px);margin:8px 0}h2{font-size:22px}section{background:white;border:1px solid #dedfd3;border-radius:18px;margin:24px 0;padding:24px}aside{background:#f5e5b8;border-radius:12px;padding:16px}label{display:block;margin:14px 0}input,select,textarea,button{font:inherit;max-width:100%;box-sizing:border-box}input[type=file],textarea{display:block;width:100%;padding:12px;border:1px solid #b6c2b7;border-radius:8px}input[type=number]{width:80px;padding:8px}.row{display:flex;gap:20px;flex-wrap:wrap}button{border:0;border-radius:10px;padding:13px 20px;background:#285b45;color:white;cursor:pointer}button:disabled{background:#a5afa7;cursor:default}.card{border-top:1px solid #ddd;padding:20px 0}.previews{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.previews canvas{width:100%;height:auto;max-height:300px;object-fit:contain;image-rendering:auto}.previews figure{margin:0;min-width:0}.previews figcaption{font-size:13px}.check{display:flex;align-items:flex-start;gap:12px}input[type=checkbox]{width:24px;height:24px;flex-shrink:0}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}footer{font-size:13px;color:#586458}@media(max-width:480px){main{padding:14px}section{padding:16px}.row{gap:12px}}
+.final-card{border-top:1px solid #ddd;padding:16px 0}.previews canvas{max-height:none;display:block;cursor:crosshair}input[type=text]{width:100%;padding:10px;border:1px solid #b6c2b7;border-radius:8px}.final-card .previews canvas{cursor:default}
+
+</style></head><body><main><header><p>ASAHI · PRIVATE WORKSPACE</p><h1>スタンプ工房</h1><p>元画像を守り、一枚ずつ確かめる。</p></header><aside>初版・生成未接続。画像はこのブラウザ内で処理します。自動MATTE品質判定は未確立です。写真を外部へ送信しません。v10.0は試験候補として参照。CONTENT・SEPARATIONの全件検査は未実施で、出力は申請用ではない試用ZIPです。</aside><section><h2>1　画像を取り込む</h2><p>同じ寸法・配置の元画像と、外部で透過処理した候補PNGを選択。行列で均等に分割します。個別画像なら空きセルのないシートに並べてください。</p><label>元画像（RGB比較用）<input id="original" type="file" accept="image/png,image/jpeg,image/webp"></label><label>透過候補（PNG）<input id="candidate" type="file" accept="image/png"></label><div class="row"><label>枚数<select id="count"><option>8</option><option>16</option><option>24</option><option>32</option><option>40</option></select></label><label>列<input id="cols" type="number" min="1" max="40" value="4"></label><label>行<input id="rows" type="number" min="1" max="40" value="2"></label></div><label>セリフ（各行1枚・最大30文字。画像の下側に描画）<textarea id="phrases" rows="3" placeholder="ありがとう&#10;おつかれさま"></textarea></label><button id="analyze">分割して診断</button> <button id="demo" type="button">お試し画像で操作する</button><p>お試し画像はこの端末で作る8個の図形です。実画像や過去のQA検証結果ではありません。</p></section><section><h2>2　MATTEを確かめる</h2><p>自動検査は透過・空画像・可視RGB変更を検出し、alpha分布・境界接触・8近傍の連結成分を記録します。色だけで残留や欠損を断定できません。各画像を拡大し、元画像・alpha・明暗背景で確認してください。座標は各セル左上が(0,0)です。</p><p id="status" role="status" aria-live="polite">画像未取込み → 分割未実行 → MATTE未検証 → ZIP停止</p><div id="cards"></div><button id="diagnostic" disabled>診断JSONを保存</button> <button id="evidence" disabled>画素証拠ZIPを保存（申請用ではありません）</button></section><section><h2>3　非生成加工・ZIP</h2><p>native matteをSHA-256付きで保全し、確認後にリサイズ・セリフ描画します。main/tabは1枚目のnative matteから作成します。加工後の明暗プレビューを全件確認してからZIPを出力できます。ZIPを再読込みし、CRC・全ファイルの名前・寸法・透過・サイズを検査します。</p><label class="check"><input id="official" type="checkbox">LINE公式の最新規格を自分で確認しました（公式ページ取得制限により、この初版の規格は未照合）。</label><p>暫定検査：8/16/24/32/40枚、スタンプ370×320、main 240×240、tab 96×74、透過PNG、各1MB以下、ZIP60MB以下。</p><button id="prepare" disabled>加工して最終プレビューを作成</button><div id="finalCards"></div><button id="export" disabled>最終確認済みの試用ZIPを保存</button><p id="exportStatus" role="status"></p></section><footer>自動PASSは表示しません。人間の確認も画質の保証ではありません。作業は保存されないため診断をダウンロードしてください。</footer></main><script type="module">
+// src/sha256.js
+// SHA-256, FIPS 180-4. Used when WebCrypto is unavailable on a private HTTP LAN.
+// This computes an integrity digest; it does not provide transport encryption.
+const K = new Uint32Array([
+  0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+  0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+  0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+  0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+  0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+  0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+  0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+  0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2
+]);
+const rotate=(x,n)=>(x>>>n)|(x<<(32-n));
+function sha256Fallback(input) {
+  const data=new Uint8Array(Math.ceil((input.length+9)/64)*64);data.set(input);data[input.length]=0x80;
+  const view=new DataView(data.buffer);view.setUint32(data.length-8,Math.floor(input.length/0x20000000));view.setUint32(data.length-4,(input.length*8)>>>0);
+  const state=new Uint32Array([0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19]),w=new Uint32Array(64);
+  for(let offset=0;offset<data.length;offset+=64){
+    for(let i=0;i<16;i++)w[i]=view.getUint32(offset+i*4);
+    for(let i=16;i<64;i++){const x=w[i-15],y=w[i-2],s0=rotate(x,7)^rotate(x,18)^(x>>>3),s1=rotate(y,17)^rotate(y,19)^(y>>>10);w[i]=(w[i-16]+s0+w[i-7]+s1)>>>0;}
+    let [a,b,c,d,e,f,g,h]=state;
+    for(let i=0;i<64;i++){
+      const s1=rotate(e,6)^rotate(e,11)^rotate(e,25),choose=(e&f)^(~e&g),t1=(h+s1+choose+K[i]+w[i])>>>0;
+      const s0=rotate(a,2)^rotate(a,13)^rotate(a,22),majority=(a&b)^(a&c)^(b&c),t2=(s0+majority)>>>0;
+      h=g;g=f;f=e;e=(d+t1)>>>0;d=c;c=b;b=a;a=(t1+t2)>>>0;
+    }
+    for(const [i,value] of [a,b,c,d,e,f,g,h].entries())state[i]=(state[i]+value)>>>0;
+  }
+  const output=new Uint8Array(32),outView=new DataView(output.buffer);for(let i=0;i<8;i++)outView.setUint32(i*4,state[i]);return output;
+}
+async function sha256(input){return globalThis.crypto?.subtle?new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256',input)):sha256Fallback(input);}
+
+// src/matte.js
+// Geometry and alpha measurements are evidence, never semantic defect labels.
+function alphaEvidence(rgba, width, height, limit = 100) {
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 || rgba.length !== width * height * 4) throw Error('画素寸法が一致しません');
+  const histogram = Array(256).fill(0), visited = new Uint8Array(width * height);
+  let borderPixels = 0, componentCount = 0;
+  const components = [], queue = new Int32Array(width * height);
+  for (let i = 0; i < visited.length; i++) {
+    const a = rgba[i * 4 + 3]; histogram[a]++;
+    const x = i % width, y = Math.floor(i / width);
+    if (a && (x === 0 || y === 0 || x === width - 1 || y === height - 1)) borderPixels++;
+  }
+  for (let seed = 0; seed < visited.length; seed++) {
+    if (visited[seed] || !rgba[seed * 4 + 3]) continue;
+    let head = 0, tail = 1, minX = width, minY = height, maxX = 0, maxY = 0, alphaSum = 0;
+    queue[0] = seed; visited[seed] = 1;
+    while (head < tail) {
+      const i = queue[head++], x = i % width, y = Math.floor(i / width);
+      minX = Math.min(minX,x); minY = Math.min(minY,y); maxX = Math.max(maxX,x); maxY = Math.max(maxY,y); alphaSum += rgba[i * 4 + 3];
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+        const next = ny * width + nx;
+        if (!visited[next] && rgba[next * 4 + 3]) { visited[next] = 1; queue[tail++] = next; }
+      }
+    }
+    componentCount++;
+    if (components.length < limit) components.push({id:componentCount,pixels:tail,alphaSum,bounds:{x:minX,y:minY,width:maxX-minX+1,height:maxY-minY+1},semanticQuality:'UNKNOWN'});
+  }
+  return {alphaHistogram:histogram,borderPixels,connectivity:8,componentCount,components,componentsTruncated:componentCount>components.length,note:'alpha>0を8近傍で集計。小成分・境界接触は欠陥の確定ではなく確認位置の証拠。'};
+}
+function compositePixel(rgba, background) {
+  const alpha = rgba[3] / 255;
+  return rgba.slice(0,3).map((c,i) => Math.round(c*alpha+background[i]*(1-alpha)));
+}
+function samplePixel(original,candidate,width,height,x,y) {
+  if (!Number.isInteger(x)||!Number.isInteger(y)||x<0||y<0||x>=width||y>=height||original.length!==width*height*4||candidate.length!==original.length) throw Error('画素座標が範囲外です');
+  const p=(y*width+x)*4, rgba=Array.from(candidate.slice(p,p+4));
+  const dark=compositePixel(rgba,[24,24,24]),light=compositePixel(rgba,[255,255,255]);
+  return {x,y,originalRGBA:Array.from(original.slice(p,p+4)),candidateRGBA:rgba,darkRGB:dark,lightRGB:light,removalImpactMaxChannel:Math.max(...dark.map(c=>Math.abs(c-24)),...light.map(c=>Math.abs(c-255))),semanticQuality:'UNKNOWN',note:'指定背景・原寸の1画素の計算値。削除許可、不可視性、リサイズ後の上限を意味しない。'};
+}
+async function rgbaHash(rgba,width,height) {
+  if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||rgba.length!==width*height*4)throw Error('画素寸法が一致しません');
+  const bytes=new Uint8Array(8+rgba.length),view=new DataView(bytes.buffer);
+  view.setUint32(0,width,true);view.setUint32(4,height,true);bytes.set(rgba,8);
+  return Array.from(await sha256(bytes),b=>b.toString(16).padStart(2,'0')).join('');
+}
+// Evaluation reports abstentions separately. Ground truth must come from controlled edits,
+// not from the implementation's own diagnostic output.
+function calibrationMetrics(cases) {
+  let truePositive=0,falsePositive=0,trueNegative=0,falseNegative=0,unknownDefect=0,unknownClean=0;
+  if (!cases.length) throw Error('対照がありません');
+  for (const c of cases) {
+    if(typeof c.defect!=='boolean'||!['DEFECT','CLEAN','UNKNOWN'].includes(c.prediction))throw Error('校正ラベルが不正です');
+    if(c.prediction==='UNKNOWN'){if(c.defect)unknownDefect++;else unknownClean++;}
+    else if(c.prediction==='DEFECT'){if(c.defect)truePositive++;else falsePositive++;}
+    else if(c.defect)falseNegative++;else trueNegative++;
+  }
+  const positives=truePositive+falseNegative+unknownDefect,negatives=falsePositive+trueNegative+unknownClean;
+  return {total:cases.length,truePositive,falsePositive,trueNegative,falseNegative,unknownDefect,unknownClean,sensitivity:positives?truePositive/positives:null,falsePositiveRate:negatives?falsePositive/negatives:null,unknownRate:(unknownDefect+unknownClean)/cases.length,decidedCoverage:1-(unknownDefect+unknownClean)/cases.length,qualityCapability:'UNVERIFIED'};
+}
+
+// src/core.js
+const COUNTS=[8,16,24,32,40];
+function gridPreset(count){const grids={8:[4,2],16:[4,4],24:[6,4],32:[8,4],40:[8,5]};if(!grids[count])throw Error('対応していない枚数です');return grids[count];}
+function gridRects(width,height,cols,rows,count){
+ if(!COUNTS.includes(count)||!Number.isInteger(cols)||!Number.isInteger(rows)||cols<1||rows<1||cols*rows!==count||width<cols||height<rows)throw Error('枚数と行列、画像寸法が一致しません');
+ return Array.from({length:count},(_,i)=>{const x=Math.floor(i%cols*width/cols),y=Math.floor(Math.floor(i/cols)*height/rows);return {x,y,width:Math.floor((i%cols+1)*width/cols)-x,height:Math.floor((Math.floor(i/cols)+1)*height/rows)-y};});
+}
+function diagnose(original,candidate,width,height){
+ if(original.length!==width*height*4||candidate.length!==original.length)throw Error('画素寸法が一致しません');
+ let transparent=0,visible=0,partial=0,rgbChanges=0;const locations=[];let locationCount=0;
+ for(let p=0;p<candidate.length;p+=4){const a=candidate[p+3],index=p/4; if(a===0)transparent++;else visible++;if(a>0&&a<255)partial++;
+ const changed=a>0&&(original[p]!==candidate[p]||original[p+1]!==candidate[p+1]||original[p+2]!==candidate[p+2]);if(changed)rgbChanges++;
+ const x=index%width,y=Math.floor(index/width);if(changed||(a>0&&(x===0||y===0||x===width-1||y===height-1))){locationCount++;if(locations.length<100)locations.push({x,y,reason:changed?'VISIBLE_RGB_CHANGED':'VISIBLE_AT_BORDER',alpha:a});}
+ }
+ const failures=[];if(!transparent)failures.push('NO_TRANSPARENCY');if(!visible)failures.push('EMPTY_FOREGROUND');if(rgbChanges)failures.push('VISIBLE_RGB_CHANGED');
+ return {status:failures.length?'FAIL':'REVIEW_REQUIRED',width,height,transparent,visible,partial,rgbChanges,failures,locations,locationsTruncated:locationCount>locations.length,locationCount,geometry:alphaEvidence(candidate,width,height),semanticQuality:'UNKNOWN',nextAction:'暗・明背景で縁欠損と背景残留を元画像と比較してください。不明なら承認せず候補を修正して再取込みしてください。'};
+}
+function exportAllowed(items,officialConfirmed){return officialConfirmed&&items.length>0&&COUNTS.includes(items.length)&&items.every(i=>i.qc.status==='REVIEW_REQUIRED'&&i.review===true);}
+function crc32(bytes){let c=0xffffffff;for(const b of bytes){c^=b;for(let k=0;k<8;k++)c=(c>>>1)^((c&1)?0xedb88320:0);}return (c^0xffffffff)>>>0;}
+const enc=new TextEncoder();
+function zipStore(files){
+ let offset=0;const chunks=[],central=[];
+ for(const {name,data} of files){const n=enc.encode(name),crc=crc32(data),h=new Uint8Array(30+n.length),v=new DataView(h.buffer);v.setUint32(0,0x04034b50,true);v.setUint16(4,20,true);v.setUint32(14,crc,true);v.setUint32(18,data.length,true);v.setUint32(22,data.length,true);v.setUint16(26,n.length,true);h.set(n,30);chunks.push(h,data);
+ const c=new Uint8Array(46+n.length),d=new DataView(c.buffer);d.setUint32(0,0x02014b50,true);d.setUint16(4,20,true);d.setUint16(6,20,true);d.setUint32(16,crc,true);d.setUint32(20,data.length,true);d.setUint32(24,data.length,true);d.setUint16(28,n.length,true);d.setUint32(42,offset,true);c.set(n,46);central.push(c);offset+=h.length+data.length;}
+ const size=central.reduce((s,c)=>s+c.length,0),end=new Uint8Array(22),e=new DataView(end.buffer);e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,size,true);e.setUint32(16,offset,true);
+ const out=new Uint8Array(offset+size+22);let p=0;for(const c of [...chunks,...central,end]){out.set(c,p);p+=c.length;}return out;
+}
+function readZip(bytes){const v=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength),out=[];let p=0;while(p+4<=bytes.length&&v.getUint32(p,true)===0x04034b50){if(p+30>bytes.length)throw Error('ZIP truncated');const size=v.getUint32(p+18,true),n=v.getUint16(p+26,true),extra=v.getUint16(p+28,true),start=p+30+n+extra,end=start+size;if(end>bytes.length)throw Error('ZIP truncated');const data=bytes.slice(start,end),name=new TextDecoder().decode(bytes.slice(p+30,p+30+n));if(crc32(data)!==v.getUint32(p+14,true))throw Error('ZIP CRC mismatch');out.push({name,data});p=end;}if(!out.length||p+4>bytes.length||v.getUint32(p,true)!==0x02014b50)throw Error('Invalid ZIP');return out;}
+function validateNames(files,count){const expected=[...Array.from({length:count},(_,i)=>String(i+1).padStart(2,'0')+'.png'),'main.png','tab.png'];if(files.length!==expected.length||expected.some((n,i)=>files[i].name!==n))throw Error('ZIP内の枚数・ファイル名が不正です');}
+
+// src/app.js
+const $=id=>document.getElementById(id);
+let items=[],generation=0,finalAssets=[],busy=false,revision=0;
+const evidenceState={v011Audit:'READ: docs/LINE3STEP_v011_quality_policy_audit.md',v011OriginalZip:'NOT_RECEIVED',v012Zip:'NOT_RECEIVED',v012Validation:'NOT_RUN',v10Reference:'READ: docs/LINE3STEP_v10_0_INTEGRATED_TEST_CANDIDATE.md; TEST_CANDIDATE_NOT_VERIFIED',calibration:'UNVERIFIED'};
+function clearFinal(){revision++;finalAssets=[];$('finalCards').replaceChildren();$('exportStatus').textContent='';}
+function invalidate(){generation++;items=[];clearFinal();$('cards').replaceChildren();$('diagnostic').disabled=true;$('evidence').disabled=true;$('status').textContent='入力変更 → 再診断が必要 → 承認無効 → ZIP停止';updateGate();}
+for(const id of ['original','candidate','count','cols','rows','phrases'])$(id).addEventListener('input',invalidate);
+$('official').addEventListener('change',updateGate);
+$('count').addEventListener('input',()=>{const [cols,rows]=gridPreset(Number($('count').value));$('cols').value=cols;$('rows').value=rows;});
+function nativeApproved(){return exportAllowed(items,$('official').checked)&&items.every(i=>i.reviewNote.trim()&&i.observations.every(o=>o.disposition==='HUMAN_ACCEPTED'));}
+function updateGate(){
+ $('prepare').disabled=busy||!nativeApproved();
+ $('export').disabled=busy||!nativeApproved()||!finalAssets.length||!finalAssets.every(a=>a.review);
+}
+function canvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}
+function pixels(c){return c.getContext('2d',{willReadFrequently:true}).getImageData(0,0,c.width,c.height).data;}
+async function load(file){
+ if(!file)throw Error('元画像と透過候補を選択してください');
+ if(file.size>20*1024*1024)throw Error('入力は各20MB以下にしてください');
+ const url=URL.createObjectURL(file);
+ try{const image=new Image();image.src=url;await image.decode();if(image.width*image.height>16_000_000||image.width>8192||image.height>8192)throw Error('入力は1600万画素以下、各辺8192px以下にしてください');const c=canvas(image.width,image.height);c.getContext('2d').drawImage(image,0,0);return c;}finally{URL.revokeObjectURL(url);}
+}
+function crop(source,r){const c=canvas(r.width,r.height);c.getContext('2d').drawImage(source,r.x,r.y,r.width,r.height,0,0,r.width,r.height);return c;}
+function preview(source,type,bounded=false){
+ const scale=bounded?Math.min(1,512/Math.max(source.width,source.height)):1;
+ if(type==='alpha'&&bounded&&scale<1){const full=preview(source,type);const small=canvas(Math.max(1,Math.round(source.width*scale)),Math.max(1,Math.round(source.height*scale)));small.getContext('2d').drawImage(full,0,0,small.width,small.height);full.width=full.height=0;return small;}
+ const c=canvas(Math.max(1,Math.round(source.width*scale)),Math.max(1,Math.round(source.height*scale))),ctx=c.getContext('2d',{willReadFrequently:true});
+ if(type==='alpha'){const data=ctx.createImageData(c.width,c.height),p=pixels(source);for(let i=0;i<p.length;i+=4){data.data[i]=data.data[i+1]=data.data[i+2]=p[i+3];data.data[i+3]=255;}ctx.putImageData(data,0,0);}
+ else{if(type!=='元画像'){ctx.fillStyle=type==='暗背景'?'#181818':'#fff';ctx.fillRect(0,0,c.width,c.height);}ctx.drawImage(source,0,0,c.width,c.height);}
+ return c;
+}
+function text(tag,value){const el=document.createElement(tag);el.textContent=value;return el;}
+function viewsFor(entries,onPoint){
+ const views=document.createElement('div');views.className='previews';
+ for(const [label,source] of entries){const figure=document.createElement('figure'),c=preview(source,label,true);figure.append(c,text('figcaption',label));
+  if(onPoint)c.addEventListener('click',event=>{const r=c.getBoundingClientRect();onPoint(Math.min(source.width-1,Math.floor((event.clientX-r.left)*source.width/r.width)),Math.min(source.height-1,Math.floor((event.clientY-r.top)*source.height/r.height)));});
+  views.append(figure);
+ }
+ return views;
+}
+function nativeCard(item){
+ const card=document.createElement('article');card.className='card';card.append(text('h3',`${item.id} ${item.phrase} — ${item.qc.status}`));
+ const sampled=text('pre','画像をタップすると原寸座標のRGBA・合成値を表示します。');let selectedPoint=null;
+ card.append(viewsFor([['元画像',item.original],['alpha',item.candidate],['暗背景',item.candidate],['明背景',item.candidate]],(x,y)=>{
+  selectedPoint=samplePixel(pixels(item.original),pixels(item.candidate),item.candidate.width,item.candidate.height,x,y);sampled.textContent=JSON.stringify(selectedPoint,null,2);
+ }));card.append(sampled);
+ const obsLabel=document.createElement('label');obsLabel.append(text('span','この位置の観測理由（欠損疑い・残留疑い・判別不能など）'));const obsNote=document.createElement('input');obsNote.type='text';obsNote.maxLength=300;obsLabel.append(obsNote);card.append(obsLabel);
+ const add=text('button','選択画素を要確認として記録');add.type='button';const observations=document.createElement('div');observations.className='observations';
+ add.onclick=()=>{if(!selectedPoint||!obsNote.value.trim()){sampled.textContent='先に画像の位置をタップし、観測理由を記入してください。';return;}
+  const observation={...selectedPoint,reason:obsNote.value.trim(),disposition:'UNKNOWN',resolutionNote:''};item.observations.push(observation);item.review=false;check.checked=false;clearFinal();
+  const row=document.createElement('div');row.append(text('p',`(${observation.x}, ${observation.y}) ${observation.reason} — UNKNOWN`));
+  const resolution=document.createElement('input');resolution.type='text';resolution.placeholder='元画像との比較結果と判断理由';resolution.maxLength=500;resolution.setAttribute('aria-label','観測位置の判断理由');
+  const accept=document.createElement('input');accept.type='checkbox';const acceptLabel=document.createElement('label');acceptLabel.className='check';acceptLabel.append(accept,document.createTextNode('この位置を目視確認して許容と判断（正解alphaの証明ではありません）'));
+  const changed=()=>{observation.resolutionNote=resolution.value;observation.disposition=accept.checked&&resolution.value.trim()?'HUMAN_ACCEPTED':'UNKNOWN';item.review=false;check.checked=false;clearFinal();updateGate();};resolution.oninput=changed;accept.onchange=changed;row.append(resolution,acceptLabel);observations.append(row);obsNote.value='';updateGate();
+ };card.append(add,observations);
+ const details=document.createElement('details');details.append(text('summary','alpha分布・連結成分・検出座標・次の操作'),text('pre',JSON.stringify(item.qc,null,2)));card.append(details);
+ const noteLabel=document.createElement('label');noteLabel.append(text('span','確認結果・確認できない項目・不足する証拠'));const note=document.createElement('textarea');note.rows=2;note.maxLength=1000;note.className='review-note';noteLabel.append(note);card.append(noteLabel);
+ const check=document.createElement('input');check.type='checkbox';check.className='native-review';check.disabled=item.qc.status==='FAIL';
+ note.oninput=()=>{item.reviewNote=note.value;item.review=false;check.checked=false;clearFinal();updateGate();};
+ check.onchange=()=>{item.review=check.checked;clearFinal();updateGate();};
+ const label=document.createElement('label');label.className='check';label.append(check,document.createTextNode('元画像・alpha・明暗背景を比較し、欠損・残留がないと判断しました。不明ならチェックしません。確認結果の記入が必要です。'));card.append(label);return card;
+}
+$('analyze').onclick=async()=>{
+ invalidate();const token=generation;$('analyze').disabled=true;
+ try{
+  const candidateFile=$('candidate').files[0];if(candidateFile?.type!=='image/png')throw Error('候補はPNGを選択してください');
+  const [original,candidate]=await Promise.all([load($('original').files[0]),load(candidateFile)]);if(token!==generation)return;
+  if(original.width!==candidate.width||original.height!==candidate.height)throw Error('元画像と候補の寸法が一致しません。リサイズせず同寸法で再取込みしてください');
+  const count=Number($('count').value),rects=gridRects(original.width,original.height,Number($('cols').value),Number($('rows').value),count),phrases=$('phrases').value.split('\n');
+  if(phrases.length>count||phrases.some(p=>Array.from(p).length>30))throw Error('セリフは各30文字以内、行数は枚数以内にしてください');
+  const next=[];
+  for(let i=0;i<rects.length;i++){
+   const r=rects[i],o=crop(original,r),c=crop(candidate,r),nativeHash=await rgbaHash(pixels(c),c.width,c.height);
+   next.push({id:String(i+1).padStart(2,'0'),phrase:phrases[i]||'',rect:r,original:o,candidate:c,nativeHash,originalHash:await rgbaHash(pixels(o),o.width,o.height),qc:diagnose(pixels(o),pixels(c),r.width,r.height),review:false,reviewNote:'',observations:[]});
+  }
+  if(token!==generation)return;items=next;for(const item of items)$('cards').append(nativeCard(item));
+  $('status').textContent=`分割 ${items.length}枚 / 機械検査FAIL ${items.filter(i=>i.qc.status==='FAIL').length}枚 / 意味的品質 UNKNOWN・人間の確認待ち / 校正UNVERIFIED / v0.12未実施`;
+  $('diagnostic').disabled=false;$('evidence').disabled=false;updateGate();
+ }catch(e){if(token===generation)$('status').textContent='停止: '+e.message;}finally{$('analyze').disabled=false;}
+};
+function download(data,name,type){const url=URL.createObjectURL(new Blob([data],{type})),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}
+function report(snapshot=items){return {schema:2,createdAt:new Date().toISOString(),evidenceState,officialSpecification:'NOT_VERIFIED_BY_DEVELOPER',protocol:{manifestSchemaVersion:'9.8',content:'NOT_RUN',separation:'NOT_RUN',matte:'UNVERIFIED',step2Overall:'UNVERIFIED',step3Allowed:false,generationCalls:0,acquisition:'USER_FILES_NOT_VERIFIED_AS_GENERATION_ORIGINAL',note:'均等分割と人間確認の試用モード。v10.0三ゲート総合PASSではありません。'},generation:'DISCONNECTED',hashFormat:'SHA-256: uint32 LE width, uint32 LE height, decoded canvas RGBA; not original-file bytes',items:snapshot.map(({id,phrase,rect,qc,review,reviewNote,observations,nativeHash,originalHash})=>({id,phrase,rect,qc,humanReviewed:review,reviewNote,observations,nativeHash,originalHash})),finalAssets:finalAssets.map(({name,width,height,review,sourceHash,outputHash})=>({name,width,height,humanReviewed:review,sourceHash,outputHash})),note:'座標はセル内原寸。合成・ハッシュ一致はMATTE品質の証明ではありません。'};}
+$('diagnostic').onclick=()=>download(JSON.stringify(report(),null,2),'matte-diagnostic.json','application/json');
+async function png(c){return new Uint8Array(await (await new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(Error('PNG変換失敗')),'image/png'))).arrayBuffer());}
+function fit(source,w,h,phrase=''){
+ const c=canvas(w,h),ctx=c.getContext('2d'),textHeight=phrase?80:0;
+ const scale=Math.min((w-20)/source.width,(h-20-textHeight)/source.height),dw=Math.max(1,Math.round(source.width*scale)),dh=Math.max(1,Math.round(source.height*scale));
+ ctx.drawImage(source,Math.floor((w-dw)/2),Math.floor((h-textHeight-dh)/2),dw,dh);
+ if(phrase){
+  // Reserve two lines. Fit by measured width without cropping or changing source pixels.
+  const chars=Array.from(phrase),lines=chars.length>15?[chars.slice(0,15).join(''),chars.slice(15).join('')]:[phrase];let fontSize=30;
+  do{ctx.font=`bold ${fontSize}px sans-serif`;if(lines.every(line=>ctx.measureText(line).width<=w-28))break;fontSize--;}while(fontSize>10);
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.strokeStyle='#fff';ctx.lineWidth=5;ctx.fillStyle='#203c30';
+  lines.forEach((line,i)=>{const y=h-textHeight+(textHeight-lines.length*32)/2+16+i*32;ctx.strokeText(line,w/2,y);ctx.fillText(line,w/2,y);});
+ }
+ return c;
+}
+async function validatePng(data,w,h){
+ if(data.length>1024*1024)throw Error('PNGが1MBを超えています');
+ const c=await load(new File([data],'check.png',{type:'image/png'}));if(c.width!==w||c.height!==h)throw Error('出力寸法不一致');
+ const p=pixels(c);let clear=false,visible=false;for(let i=3;i<p.length;i+=4){if(p[i]===0)clear=true;if(p[i]>0)visible=true;}if(!clear||!visible)throw Error('透過または前景がありません');return c;
+}
+async function verifyNative(snapshot){for(const i of snapshot)if(await rgbaHash(pixels(i.candidate),i.candidate.width,i.candidate.height)!==i.nativeHash)throw Error('native matteが変更されています。再取込みしてください');}
+$('prepare').onclick=async()=>{
+ clearFinal();const token=generation,revisionToken=revision,snapshot=items.slice();busy=true;updateGate();
+ try{
+  if(!nativeApproved())throw Error('全件の確認結果・承認・規格確認が必要です');await verifyNative(snapshot);
+  const next=[];
+  const specs=[...snapshot.map(i=>({name:i.id+'.png',item:i,width:370,height:320,phrase:i.phrase})),{name:'main.png',item:snapshot[0],width:240,height:240},{name:'tab.png',item:snapshot[0],width:96,height:74}];
+  for(const spec of specs){const rendered=fit(spec.item.candidate,spec.width,spec.height,spec.phrase),data=await png(rendered),decoded=await validatePng(data,spec.width,spec.height);next.push({name:spec.name,width:spec.width,height:spec.height,data,canvas:decoded,sourceHash:spec.item.nativeHash,outputHash:await rgbaHash(pixels(decoded),decoded.width,decoded.height),review:false});}
+  await verifyNative(snapshot);if(token!==generation||revisionToken!==revision||!nativeApproved())throw Error('入力または承認が変わりました');
+  finalAssets=next;
+  for(const asset of finalAssets){const card=document.createElement('article');card.className='final-card';card.append(text('h3',asset.name),viewsFor([['暗背景',asset.canvas],['明背景',asset.canvas]]));
+   const check=document.createElement('input');check.type='checkbox';check.className='final-review';check.onchange=()=>{asset.review=check.checked;updateGate();};const label=document.createElement('label');label.className='check';label.append(check,document.createTextNode('最終サイズの縁・セリフ・配置を確認しました。不明なら承認しません。'));card.append(label);$('finalCards').append(card);
+  }
+  $('exportStatus').textContent='加工完了。native matteとは別に、最終PNGを全件確認してください。';
+ }catch(e){clearFinal();$('exportStatus').textContent='加工停止: '+e.message;}finally{busy=false;updateGate();}
+};
+$('export').onclick=async()=>{
+ const token=generation,revisionToken=revision,snapshot=items.slice(),assets=finalAssets.slice();busy=true;updateGate();
+ try{
+  if(!nativeApproved()||!assets.length||!assets.every(a=>a.review))throw Error('最終確認が不足しています');await verifyNative(snapshot);
+  const zip=zipStore(assets);if(zip.length>60*1024*1024)throw Error('ZIPが60MBを超えています');const unpacked=readZip(zip);validateNames(unpacked,snapshot.length);
+  for(let i=0;i<unpacked.length;i++){const f=unpacked[i],a=assets[i],decoded=await validatePng(f.data,a.width,a.height);if(await rgbaHash(pixels(decoded),a.width,a.height)!==a.outputHash)throw Error('最終確認済み画像とZIPが一致しません');}
+  if(token!==generation||revisionToken!==revision||!nativeApproved()||finalAssets.length!==assets.length||finalAssets.some((a,i)=>a!==assets[i])||!assets.every(a=>a.review))throw Error('入力や承認が変わりました。再確認してください');
+  download(zip,'trial-stickers-not-for-submission.zip','application/zip');$('exportStatus').textContent='試用ZIP内全PNGの機械検査完了・確認画像との一致確認。CONTENT/SEPARATION未実施のため申請用ではありません。';
+ }catch(e){$('exportStatus').textContent='ZIP停止: '+e.message;}finally{busy=false;updateGate();}
+};
+$('evidence').onclick=async()=>{
+ const snapshot=items.slice(),manifest=structuredClone(report(snapshot));$('evidence').disabled=true;
+ try{const files=[];for(const i of snapshot){for(const [suffix,c]of [['original',i.original],['candidate',i.candidate],['alpha',preview(i.candidate,'alpha')],['dark',preview(i.candidate,'暗背景')],['light',preview(i.candidate,'明背景')]])files.push({name:i.id+'-'+suffix+'.png',data:await png(c)});}
+  files.push({name:'diagnostic.json',data:new TextEncoder().encode(JSON.stringify({purpose:'QA_EVIDENCE_NOT_FOR_SUBMISSION',...manifest},null,2))});download(zipStore(files),'matte-evidence-not-for-submission.zip','application/zip');
+ }catch(e){$('status').textContent='診断保存失敗: '+e.message;}finally{$('evidence').disabled=!items.length;}
+};
+
+$('demo').onclick=async()=>{
+ try{
+  const original=canvas(400,200),candidate=canvas(400,200),o=original.getContext('2d'),c=candidate.getContext('2d');o.fillStyle='#f2d7b1';o.fillRect(0,0,400,200);
+  for(let i=0;i<8;i++){const x=(i%4)*100+50,y=Math.floor(i/4)*100+50;for(const ctx of [o,c]){ctx.fillStyle=['#3b7756','#c4674d','#547bac','#926bac'][i%4];ctx.fillRect(x-24,y-24,48,48);}}
+  const files={original:new File([await png(original)],'demo-original.png',{type:'image/png'}),candidate:new File([await png(candidate)],'demo-candidate.png',{type:'image/png'})};
+  for(const id of ['original','candidate']){const transfer=new DataTransfer();transfer.items.add(files[id]);$(id).files=transfer.files;}
+  $('count').value='8';$('cols').value='4';$('rows').value='2';$('phrases').value='ありがとう\nおつかれさま';$('official').checked=false;
+  $('analyze').click();
+ }catch(e){$('status').textContent='お試し画像の準備に失敗: '+e.message+'。元画像と候補PNGを選択してください。';}
+};
+
+</script></body></html>
