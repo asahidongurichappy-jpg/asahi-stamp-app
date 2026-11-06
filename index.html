@@ -1,8 +1,8 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-/YvER1uFq1yBmrur0+gecXe2O5EJRWVRMhO191uYqWw='; style-src 'sha256-9rjFzHxN3iPtxOJZxtm+u75BSinW0hpVSYY8uazFs2I='; img-src blob: data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"><title>アサヒのスタンプ工房</title><style>
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-3weE5Ok9LzLEWw7qNg7rmrvgzfxfiA0Iyey7BIzH71Y='; style-src 'sha256-9rjFzHxN3iPtxOJZxtm+u75BSinW0hpVSYY8uazFs2I='; img-src blob: data:; connect-src https://aihorde.net; object-src 'none'; base-uri 'none'; form-action 'none'"><title>アサヒのスタンプ工房</title><style>
 :root{font-family:system-ui,-apple-system,sans-serif;color:#263b32;background:#f3f2e9;line-height:1.7}body{margin:0}main{max-width:1000px;margin:auto;padding:24px}header{padding:28px 0}header p:first-child{font-size:12px;letter-spacing:.18em;color:#527660}h1{font-size:clamp(30px,7vw,48px);margin:8px 0}h2{font-size:22px}section{background:white;border:1px solid #dedfd3;border-radius:18px;margin:24px 0;padding:24px}aside{background:#f5e5b8;border-radius:12px;padding:16px}label{display:block;margin:14px 0}input,select,textarea,button{font:inherit;max-width:100%;box-sizing:border-box}input[type=file],textarea{display:block;width:100%;padding:12px;border:1px solid #b6c2b7;border-radius:8px}input[type=number]{width:80px;padding:8px}.row{display:flex;gap:20px;flex-wrap:wrap}button{border:0;border-radius:10px;padding:13px 20px;background:#285b45;color:white;cursor:pointer}button:disabled{background:#a5afa7;cursor:default}.card{border-top:1px solid #ddd;padding:20px 0}.previews{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.previews canvas{width:100%;height:auto;max-height:300px;object-fit:contain;image-rendering:auto}.previews figure{margin:0;min-width:0}.previews figcaption{font-size:13px}.check{display:flex;align-items:flex-start;gap:12px}input[type=checkbox]{width:24px;height:24px;flex-shrink:0}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}footer{font-size:13px;color:#586458}@media(max-width:480px){main{padding:14px}section{padding:16px}.row{gap:12px}}
 .final-card{border-top:1px solid #ddd;padding:16px 0}.previews canvas{max-height:none;display:block;cursor:crosshair}input[type=text]{width:100%;padding:10px;border:1px solid #b6c2b7;border-radius:8px}.final-card .previews canvas{cursor:default}
 
-</style></head><body><main><header><p>ASAHI · PRIVATE WORKSPACE</p><h1>スタンプ工房</h1><p>元画像を守り、一枚ずつ確かめる。</p></header><aside>初版・生成未接続。画像はこのブラウザ内で処理します。自動MATTE品質判定は未確立です。写真を外部へ送信しません。v10.0は試験候補として参照。CONTENT・SEPARATIONの全件検査は未実施で、出力は申請用ではない試用ZIPです。</aside><section><h2>1　画像を取り込む</h2><p>同じ寸法・配置の元画像と、外部で透過処理した候補PNGを選択。行列で均等に分割します。個別画像なら空きセルのないシートに並べてください。</p><label>元画像（RGB比較用）<input id="original" type="file" accept="image/png,image/jpeg,image/webp"></label><label>透過候補（PNG）<input id="candidate" type="file" accept="image/png"></label><div class="row"><label>枚数<select id="count"><option>8</option><option>16</option><option>24</option><option>32</option><option>40</option></select></label><label>列<input id="cols" type="number" min="1" max="40" value="4"></label><label>行<input id="rows" type="number" min="1" max="40" value="2"></label></div><label>セリフ（各行1枚・最大30文字。画像の下側に描画）<textarea id="phrases" rows="3" placeholder="ありがとう&#10;おつかれさま"></textarea></label><button id="analyze">分割して診断</button> <button id="demo" type="button">お試し画像で操作する</button><p>お試し画像はこの端末で作る8個の図形です。実画像や過去のQA検証結果ではありません。</p></section><section><h2>2　MATTEを確かめる</h2><p>自動検査は透過・空画像・可視RGB変更を検出し、alpha分布・境界接触・8近傍の連結成分を記録します。色だけで残留や欠損を断定できません。各画像を拡大し、元画像・alpha・明暗背景で確認してください。座標は各セル左上が(0,0)です。</p><p id="status" role="status" aria-live="polite">画像未取込み → 分割未実行 → MATTE未検証 → ZIP停止</p><div id="cards"></div><button id="diagnostic" disabled>診断JSONを保存</button> <button id="evidence" disabled>画素証拠ZIPを保存（申請用ではありません）</button></section><section><h2>3　非生成加工・ZIP</h2><p>native matteをSHA-256付きで保全し、確認後にリサイズ・セリフ描画します。main/tabは1枚目のnative matteから作成します。加工後の明暗プレビューを全件確認してからZIPを出力できます。ZIPを再読込みし、CRC・全ファイルの名前・寸法・透過・サイズを検査します。</p><label class="check"><input id="official" type="checkbox">LINE公式の最新規格を自分で確認しました（公式ページ取得制限により、この初版の規格は未照合）。</label><p>暫定検査：8/16/24/32/40枚、スタンプ370×320、main 240×240、tab 96×74、透過PNG、各1MB以下、ZIP60MB以下。</p><button id="prepare" disabled>加工して最終プレビューを作成</button><div id="finalCards"></div><button id="export" disabled>最終確認済みの試用ZIPを保存</button><p id="exportStatus" role="status"></p></section><footer>自動PASSは表示しません。人間の確認も画質の保証ではありません。作業は保存されないため診断をダウンロードしてください。</footer></main><script type="module">
+</style></head><body><main><header><p>ASAHI · STICKER GENERATOR</p><h1>AIスタンプ工房</h1><p>元画像を守り、一枚ずつ確かめる。</p></header><aside>AI生成に対応した試用版。生成では説明文を外部へ送信し、取り込んだ写真の加工はブラウザ内で処理します。自動MATTE品質判定は未確立です。写真を外部へ送信しません。v10.0は試験候補として参照。CONTENT・SEPARATIONの全件検査は未実施で、出力は申請用ではない試用ZIPです。</aside><section id="aiPanel"><h2>1　AIでスタンプの絵を生成する</h2><p>キャラクターの説明から、表情・ポーズ違いの画像を1枚ずつ作ります。無料・登録不要のAI Hordeを使います。ChatGPTの生成枠は使いません。</p><label>キャラクターの説明（英語推奨・400文字以内）<textarea id="aiDescription" maxlength="400" rows="3">a friendly tan shiba inu puppy, cream muzzle and belly, round face, small triangular ears</textarea></label><label>作る枚数<select id="aiCount"><option>8</option><option>16</option><option>24</option><option>32</option><option>40</option></select></label><p>無料サービスのため、1枚に数分以上かかる場合があります。Safariを開いたままにしてください。タブを閉じると作業は失われます。同じキャラクターの再現やポーズの正確さは保証されません。</p><label class="check"><input id="aiConsent" type="checkbox">説明文をAI Hordeと生成を担当する外部の協力者へ送信すること、匿名生成の説明文・生成画像が共有・データセット利用の対象になることに同意します。個人情報や秘密は入力しません。</label><p>写真はこの生成機能では送信しません。写真の人物・ペットの同一性を保つ画像生成には未対応です。下の画像取込み・加工は端末内で処理します。</p><button id="aiGenerate" type="button">無料で生成・再開</button> <button id="aiStop" type="button" disabled>生成を停止</button><p id="aiStatus" role="status" aria-live="polite">キャラクターの説明を確認して生成してください。</p><div id="aiGallery"></div><button id="aiUse" type="button" disabled>この画像でスタンプを作る</button><p>背景色の除去は暫定処理です。元画像の背景をタップして色を選び、毛の欠損や背景残りを確認してください。問題があれば元PNGを保存し、別途透過処理して下から取り込めます。</p></section><section><h2>生成済み画像・写真シートを取り込む</h2><p>同じ寸法・配置の元画像と、外部で透過処理した候補PNGを選択。行列で均等に分割します。個別画像なら空きセルのないシートに並べてください。</p><label>元画像（RGB比較用）<input id="original" type="file" accept="image/png,image/jpeg,image/webp"></label><label>透過候補（PNG）<input id="candidate" type="file" accept="image/png"></label><div class="row"><label>枚数<select id="count"><option>8</option><option>16</option><option>24</option><option>32</option><option>40</option></select></label><label>列<input id="cols" type="number" min="1" max="40" value="4"></label><label>行<input id="rows" type="number" min="1" max="40" value="2"></label></div><label>セリフ（各行1枚・最大30文字。画像の下側に描画）<textarea id="phrases" rows="3" placeholder="ありがとう&#10;おつかれさま"></textarea></label><button id="analyze">分割して診断</button> <button id="demo" type="button">お試し画像で操作する</button><p>お試し画像はこの端末で作る8個の図形です。実画像や過去のQA検証結果ではありません。</p></section><section><h2>2　MATTEを確かめる</h2><p>自動検査は透過・空画像・可視RGB変更を検出し、alpha分布・境界接触・8近傍の連結成分を記録します。色だけで残留や欠損を断定できません。各画像を拡大し、元画像・alpha・明暗背景で確認してください。座標は各セル左上が(0,0)です。</p><p id="status" role="status" aria-live="polite">画像未取込み → 分割未実行 → MATTE未検証 → ZIP停止</p><div id="cards"></div><button id="diagnostic" disabled>診断JSONを保存</button> <button id="evidence" disabled>画素証拠ZIPを保存（申請用ではありません）</button></section><section><h2>3　非生成加工・ZIP</h2><p>native matteをSHA-256付きで保全し、確認後にリサイズ・セリフ描画します。main/tabは1枚目のnative matteから作成します。加工後の明暗プレビューを全件確認してからZIPを出力できます。ZIPを再読込みし、CRC・全ファイルの名前・寸法・透過・サイズを検査します。</p><label class="check"><input id="official" type="checkbox">LINE公式の最新規格を自分で確認しました（公式ページ取得制限により、この初版の規格は未照合）。</label><p>暫定検査：8/16/24/32/40枚、スタンプ370×320、main 240×240、tab 96×74、透過PNG、各1MB以下、ZIP60MB以下。</p><button id="prepare" disabled>加工して最終プレビューを作成</button><div id="finalCards"></div><button id="export" disabled>最終確認済みの試用ZIPを保存</button><p id="exportStatus" role="status"></p></section><footer>自動PASSは表示しません。人間の確認も画質の保証ではありません。作業は保存されないため診断をダウンロードしてください。</footer></main><script type="module">
 // src/sha256.js
 // SHA-256, FIPS 180-4. Used when WebCrypto is unavailable on a private HTTP LAN.
 // This computes an integrity digest; it does not provide transport encryption.
@@ -133,7 +133,7 @@ const $=id=>document.getElementById(id);
 let items=[],generation=0,finalAssets=[],busy=false,revision=0;
 const evidenceState={v011Audit:'READ: docs/LINE3STEP_v011_quality_policy_audit.md',v011OriginalZip:'NOT_RECEIVED',v012Zip:'NOT_RECEIVED',v012Validation:'NOT_RUN',v10Reference:'READ: docs/LINE3STEP_v10_0_INTEGRATED_TEST_CANDIDATE.md; TEST_CANDIDATE_NOT_VERIFIED',calibration:'UNVERIFIED'};
 function clearFinal(){revision++;finalAssets=[];$('finalCards').replaceChildren();$('exportStatus').textContent='';}
-function invalidate(){generation++;items=[];clearFinal();$('cards').replaceChildren();$('diagnostic').disabled=true;$('evidence').disabled=true;$('status').textContent='入力変更 → 再診断が必要 → 承認無効 → ZIP停止';updateGate();}
+function invalidate(){aiProvenance=null;generation++;items=[];clearFinal();$('cards').replaceChildren();$('diagnostic').disabled=true;$('evidence').disabled=true;$('status').textContent='入力変更 → 再診断が必要 → 承認無効 → ZIP停止';updateGate();}
 for(const id of ['original','candidate','count','cols','rows','phrases'])$(id).addEventListener('input',invalidate);
 $('official').addEventListener('change',updateGate);
 $('count').addEventListener('input',()=>{const [cols,rows]=gridPreset(Number($('count').value));$('cols').value=cols;$('rows').value=rows;});
@@ -200,8 +200,8 @@ $('analyze').onclick=async()=>{
   if(phrases.length>count||phrases.some(p=>Array.from(p).length>30))throw Error('セリフは各30文字以内、行数は枚数以内にしてください');
   const next=[];
   for(let i=0;i<rects.length;i++){
-   const r=rects[i],o=crop(original,r),c=crop(candidate,r),nativeHash=await rgbaHash(pixels(c),c.width,c.height);
-   next.push({id:String(i+1).padStart(2,'0'),phrase:phrases[i]||'',rect:r,original:o,candidate:c,nativeHash,originalHash:await rgbaHash(pixels(o),o.width,o.height),qc:diagnose(pixels(o),pixels(c),r.width,r.height),review:false,reviewNote:'',observations:[]});
+   const r=rects[i],o=crop(original,r),c=crop(candidate,r);
+   next.push(await makeNativeItem(i,o,c,phrases[i]||'',r));
   }
   if(token!==generation)return;items=next;for(const item of items)$('cards').append(nativeCard(item));
   $('status').textContent=`分割 ${items.length}枚 / 機械検査FAIL ${items.filter(i=>i.qc.status==='FAIL').length}枚 / 意味的品質 UNKNOWN・人間の確認待ち / 校正UNVERIFIED / v0.12未実施`;
@@ -209,7 +209,7 @@ $('analyze').onclick=async()=>{
  }catch(e){if(token===generation)$('status').textContent='停止: '+e.message;}finally{$('analyze').disabled=false;}
 };
 function download(data,name,type){const url=URL.createObjectURL(new Blob([data],{type})),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}
-function report(snapshot=items){return {schema:2,createdAt:new Date().toISOString(),evidenceState,officialSpecification:'NOT_VERIFIED_BY_DEVELOPER',protocol:{manifestSchemaVersion:'9.8',content:'NOT_RUN',separation:'NOT_RUN',matte:'UNVERIFIED',step2Overall:'UNVERIFIED',step3Allowed:false,generationCalls:0,acquisition:'USER_FILES_NOT_VERIFIED_AS_GENERATION_ORIGINAL',note:'均等分割と人間確認の試用モード。v10.0三ゲート総合PASSではありません。'},generation:'DISCONNECTED',hashFormat:'SHA-256: uint32 LE width, uint32 LE height, decoded canvas RGBA; not original-file bytes',items:snapshot.map(({id,phrase,rect,qc,review,reviewNote,observations,nativeHash,originalHash})=>({id,phrase,rect,qc,humanReviewed:review,reviewNote,observations,nativeHash,originalHash})),finalAssets:finalAssets.map(({name,width,height,review,sourceHash,outputHash})=>({name,width,height,humanReviewed:review,sourceHash,outputHash})),note:'座標はセル内原寸。合成・ハッシュ一致はMATTE品質の証明ではありません。'};}
+function report(snapshot=items){return {schema:2,createdAt:new Date().toISOString(),evidenceState,officialSpecification:'NOT_VERIFIED_BY_DEVELOPER',protocol:{manifestSchemaVersion:'9.8',content:'NOT_RUN',separation:'NOT_RUN',matte:'UNVERIFIED',step2Overall:'UNVERIFIED',step3Allowed:false,generationCalls:aiProvenance?.items.length||0,acquisition:aiProvenance?'AI_HORDE_GENERATED':'USER_FILES_NOT_VERIFIED_AS_GENERATION_ORIGINAL',note:'均等分割と人間確認の試用モード。v10.0三ゲート総合PASSではありません。'},generation:aiProvenance||'USER_IMPORT',hashFormat:'SHA-256: uint32 LE width, uint32 LE height, decoded canvas RGBA; not original-file bytes',items:snapshot.map(({id,phrase,rect,qc,review,reviewNote,observations,nativeHash,originalHash})=>({id,phrase,rect,qc,humanReviewed:review,reviewNote,observations,nativeHash,originalHash})),finalAssets:finalAssets.map(({name,width,height,review,sourceHash,outputHash})=>({name,width,height,humanReviewed:review,sourceHash,outputHash})),note:'座標はセル内原寸。合成・ハッシュ一致はMATTE品質の証明ではありません。'};}
 $('diagnostic').onclick=()=>download(JSON.stringify(report(),null,2),'matte-diagnostic.json','application/json');
 async function png(c){return new Uint8Array(await (await new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(Error('PNG変換失敗')),'image/png'))).arrayBuffer());}
 function fit(source,w,h,phrase=''){
@@ -274,4 +274,105 @@ $('demo').onclick=async()=>{
  }catch(e){$('status').textContent='お試し画像の準備に失敗: '+e.message+'。元画像と候補PNGを選択してください。';}
 };
 
+// Anonymous AI Horde: descriptions only; never upload the user's image inputs.
+const HORDE='https://aihorde.net/api/v2';
+const poses=[['こんにちは','waving hello with one paw'],['ありがとう','bowing gratefully'],['やった！','cheering with both paws raised'],['ごめんね','apologizing with lowered ears'],['あはは','laughing joyfully'],['おやすみ','sleeping curled up'],['びっくり','looking surprised'],['だいすき','holding a pink heart']];
+let aiRun=false,aiStop=false,aiJob=null,aiResults=[],aiDescription='',aiProvenance=null;
+async function horde(path,method='GET',body){
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30000);
+ try{
+  const response=await fetch(HORDE+path,{method,headers:{apikey:'0000000000',...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined,signal:controller.signal,credentials:'omit',referrerPolicy:'no-referrer'});
+  const value=await response.json();
+  if(!response.ok)throw Error(response.status===429?'無料枠が混雑しています。時間をおいて再開してください。':`生成サービス ${response.status}: ${String(value.message||'受付失敗').slice(0,250)}`);
+  return value;
+ }catch(e){if(e.name==='AbortError')throw Error('通信が30秒でタイムアウトしました。時間をおいて再開してください。');throw e;}
+ finally{clearTimeout(timer);}
+}
+function aiControls(){
+ $('aiGenerate').disabled=aiRun;$('aiDescription').disabled=aiRun;$('aiCount').disabled=aiRun;
+ $('aiStop').disabled=!aiRun;$('aiUse').disabled=aiRun||aiResults.length!==Number($('aiCount').value);
+}
+async function cancelJob(){if(aiJob){const id=aiJob;aiJob=null;try{await horde('/generate/status/'+encodeURIComponent(id),'DELETE');}catch{ /* expiry also removes abandoned requests */ }}}
+$('aiStop').onclick=()=>{aiStop=true;$('aiStatus').textContent='停止処理中。生成済み画像は残します。';};
+function edgeCandidate(source,tolerance,point={x:0,y:0}){
+ const c=crop(source,{x:0,y:0,width:source.width,height:source.height}),ctx=c.getContext('2d',{willReadFrequently:true}),data=ctx.getImageData(0,0,c.width,c.height),p=data.data;
+ const seen=new Uint8Array(c.width*c.height),queue=new Uint32Array(seen.length);let head=0,tail=0;
+ const key=(point.y*c.width+point.x)*4,bg=[p[key],p[key+1],p[key+2]];
+ const add=index=>{if(seen[index])return;seen[index]=1;const k=index*4;if(Math.max(Math.abs(p[k]-bg[0]),Math.abs(p[k+1]-bg[1]),Math.abs(p[k+2]-bg[2]))<=tolerance){queue[tail++]=index;p[k+3]=0;}};
+ for(let x=0;x<c.width;x++){add(x);add((c.height-1)*c.width+x);}for(let y=0;y<c.height;y++){add(y*c.width);add(y*c.width+c.width-1);}
+ while(head<tail){const i=queue[head++],x=i%c.width,y=Math.floor(i/c.width);if(x)add(i-1);if(x<c.width-1)add(i+1);if(y)add(i-c.width);if(y<c.height-1)add(i+c.width);}
+ ctx.putImageData(data,0,0);return c;
+}
+function showAiResult(result,index){
+ const card=document.createElement('article');card.className='card';card.append(text('h3',`${index+1}　${result.phrase}`));
+ const views=document.createElement('div');
+ const label=document.createElement('label');label.textContent='背景色に近い部分を抜く強さ（毛や体も消える場合があります）';
+ const range=document.createElement('input');range.type='range';range.min='0';range.max='100';range.value='16';range.setAttribute('aria-label',`${index+1}枚目の背景除去の強さ`);label.append(range);
+ const hint=text('p','元画像の背景をタップすると背景色を指定できます。最初は左上の色を使用します。');let point={x:0,y:0};
+ const draw=()=>{result.candidate=edgeCandidate(result.original,Number(range.value),point);views.replaceChildren(viewsFor([['元画像',result.original]],(x,y)=>{point={x,y};hint.textContent=`背景色の指定位置 (${x}, ${y})。輪郭と残りを確認してください。`;draw();}),viewsFor([['暗背景',result.candidate]]));};
+ range.oninput=draw;draw();
+ const save=text('button','生成元PNGを保存');save.type='button';save.onclick=async()=>{try{download(await png(result.original),`generated-${String(index+1).padStart(2,'0')}.png`,'image/png');}catch(e){$('aiStatus').textContent=e.message;}};
+ card.append(views,hint,label,save);$('aiGallery').append(card);
+}
+$('aiGenerate').onclick=async()=>{
+ if(aiRun)return;
+ if(!$('aiConsent').checked){$('aiStatus').textContent='外部送信・共有条件を確認し、同意にチェックしてください。';return;}
+ const description=$('aiDescription').value.trim(),count=Number($('aiCount').value);
+ if(!description||description.length>400){$('aiStatus').textContent='キャラクターの説明を1〜400文字で入力してください。';return;}
+ if(aiDescription!==description||aiResults.length>count){aiResults=[];$('aiGallery').replaceChildren();}
+ aiDescription=description;aiRun=true;aiStop=false;aiControls();
+ try{
+  for(let i=aiResults.length;i<count&&!aiStop;i++){
+   if(!$('aiConsent').checked)throw Error('同意が解除されたため停止しました。');
+   const pose=poses[i%poses.length],prompt=`one ${description}, ${pose[1]}, cute chibi cartoon messaging sticker illustration, consistent character design, thick dark outline, simple flat colors, full body centered with generous empty margins, plain pure white background, no text ### text, letters, watermark, cropped, extra limbs, multiple characters, grid`;
+   $('aiStatus').textContent=`${i+1}/${count}枚目を依頼しています… Safariを開いたままお待ちください。`;
+   const job=await horde('/generate/async','POST',{prompt,params:{width:512,height:512,steps:20,n:1,sampler_name:'k_euler',cfg_scale:7,seed:String(742100+i)},models:['Rev Animated'],nsfw:false,censor_nsfw:true,trusted_workers:true,r2:false,shared:true,allow_downgrade:true});
+   if(!job.id)throw Error('生成サービスから受付IDが返りませんでした。');aiJob=job.id;
+   const started=Date.now();let complete=false;
+   while(!aiStop){
+    const state=await horde('/generate/check/'+encodeURIComponent(aiJob));
+    if(state.faulted)throw Error('生成サーバーで処理に失敗しました。再開できます。');
+    if(state.done){complete=true;break;}
+    if(state.is_possible===false)throw Error('現在、この生成に対応するサーバーがありません。後で再開してください。');
+    if(Date.now()-started>20*60*1000)throw Error('1枚の待機が20分を超えたため停止しました。後で再開できます。');
+    $('aiStatus').textContent=`${i+1}/${count}枚目：順番待ち ${state.queue_position??'—'} / 目安 ${state.wait_time??'—'}秒（変動します）。生成済み ${aiResults.length}枚`;
+    for(let n=0;n<10&&!aiStop;n++)await new Promise(r=>setTimeout(r,1000));
+   }
+   if(!complete)break;
+   const status=await horde('/generate/status/'+encodeURIComponent(aiJob));aiJob=null;
+   const output=status.generations?.[0];
+   if(!output||output.censored||output.state==='censored'||output.state==='faulted')throw Error('利用できる生成画像が返りませんでした。再開してください。');
+   if(typeof output.img!=='string'||output.img.length>12_000_000||!(/^[A-Za-z0-9+/=\s]+$/.test(output.img)))throw Error('対応していない画像形式です。外部画像URLは読み込みません。');
+   const raw=Uint8Array.from(atob(output.img),c=>c.charCodeAt(0));
+   const original=await load(new File([raw],'generation.webp',{type:'image/webp'}));
+   if(original.width>1024||original.height>1024)throw Error('想定外の生成寸法です。');
+   const result={original,phrase:pose[0],model:output.model||'unknown',seed:output.seed||'',id:output.id};
+   aiResults.push(result);showAiResult(result,i);
+  }
+  $('aiStatus').textContent=aiStop?`停止しました。${aiResults.length}枚を保持しています。「生成・再開」で続けられます。`:`${aiResults.length}枚の生成完了。背景の抜け方とキャラクターの違いを確認し、「この画像でスタンプを作る」へ進んでください。`;
+ }catch(e){$('aiStatus').textContent=`生成停止：${e.message} 生成済み${aiResults.length}枚は残っています。「生成・再開」で続けられます。`;}
+ finally{await cancelJob();aiRun=false;aiControls();}
+};
+$('aiCount').onchange=aiControls;
+$('aiDescription').oninput=()=>{$('aiUse').disabled=true;};
+$('aiUse').onclick=async()=>{
+ if(aiRun||aiResults.length!==Number($('aiCount').value)||aiDescription!==$('aiDescription').value.trim())return;
+ $('aiUse').disabled=true;
+ try{
+  invalidate();const token=generation,next=[];
+  for(let i=0;i<aiResults.length;i++){const r=aiResults[i],o=r.original,c=r.candidate;next.push(await makeNativeItem(i,o,c,r.phrase,{x:0,y:0,width:o.width,height:o.height}));}
+  if(token!==generation)return;items=next;
+  aiProvenance={provider:'AI_HORDE_ANONYMOUS',shared:true,sourceImagesSent:false,items:aiResults.map(r=>({id:r.id,model:r.model,seed:r.seed}))};
+  $('count').value=String(items.length);$('cols').value='4';$('rows').value=String(items.length/4);$('official').checked=false;
+  $('phrases').value=aiResults.map(r=>r.phrase).join('\n');
+  for(const item of items)$('cards').append(nativeCard(item));
+  $('status').textContent=`AI生成 ${items.length}枚 / 背景除去は暫定処理。欠損・背景残り・同一キャラクターかを全件確認してください。`;
+  $('diagnostic').disabled=false;$('evidence').disabled=false;updateGate();$('status').scrollIntoView({behavior:'smooth'});
+ }catch(e){$('aiStatus').textContent='取込み停止：'+e.message;}
+ finally{aiControls();}
+};
+async function makeNativeItem(i,o,c,phrase,rect){return {id:String(i+1).padStart(2,'0'),phrase,rect,original:o,candidate:c,nativeHash:await rgbaHash(pixels(c),c.width,c.height),originalHash:await rgbaHash(pixels(o),o.width,o.height),qc:diagnose(pixels(o),pixels(c),c.width,c.height),review:false,reviewNote:'',observations:[]};}
+aiControls();
+
 </script></body></html>
+
