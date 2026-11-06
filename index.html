@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-3weE5Ok9LzLEWw7qNg7rmrvgzfxfiA0Iyey7BIzH71Y='; style-src 'sha256-9rjFzHxN3iPtxOJZxtm+u75BSinW0hpVSYY8uazFs2I='; img-src blob: data:; connect-src https://aihorde.net; object-src 'none'; base-uri 'none'; form-action 'none'"><title>アサヒのスタンプ工房</title><style>
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-8G4M59ANKhREAdiEfJm8imIZkan2yWTEGIcuZbAtUgA='; style-src 'sha256-9rjFzHxN3iPtxOJZxtm+u75BSinW0hpVSYY8uazFs2I='; img-src blob: data:; connect-src https://aihorde.net; object-src 'none'; base-uri 'none'; form-action 'none'"><title>アサヒのスタンプ工房</title><style>
 :root{font-family:system-ui,-apple-system,sans-serif;color:#263b32;background:#f3f2e9;line-height:1.7}body{margin:0}main{max-width:1000px;margin:auto;padding:24px}header{padding:28px 0}header p:first-child{font-size:12px;letter-spacing:.18em;color:#527660}h1{font-size:clamp(30px,7vw,48px);margin:8px 0}h2{font-size:22px}section{background:white;border:1px solid #dedfd3;border-radius:18px;margin:24px 0;padding:24px}aside{background:#f5e5b8;border-radius:12px;padding:16px}label{display:block;margin:14px 0}input,select,textarea,button{font:inherit;max-width:100%;box-sizing:border-box}input[type=file],textarea{display:block;width:100%;padding:12px;border:1px solid #b6c2b7;border-radius:8px}input[type=number]{width:80px;padding:8px}.row{display:flex;gap:20px;flex-wrap:wrap}button{border:0;border-radius:10px;padding:13px 20px;background:#285b45;color:white;cursor:pointer}button:disabled{background:#a5afa7;cursor:default}.card{border-top:1px solid #ddd;padding:20px 0}.previews{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.previews canvas{width:100%;height:auto;max-height:300px;object-fit:contain;image-rendering:auto}.previews figure{margin:0;min-width:0}.previews figcaption{font-size:13px}.check{display:flex;align-items:flex-start;gap:12px}input[type=checkbox]{width:24px;height:24px;flex-shrink:0}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}footer{font-size:13px;color:#586458}@media(max-width:480px){main{padding:14px}section{padding:16px}.row{gap:12px}}
 .final-card{border-top:1px solid #ddd;padding:16px 0}.previews canvas{max-height:none;display:block;cursor:crosshair}input[type=text]{width:100%;padding:10px;border:1px solid #b6c2b7;border-radius:8px}.final-card .previews canvas{cursor:default}
 
@@ -309,10 +309,11 @@ function showAiResult(result,index){
  const label=document.createElement('label');label.textContent='背景色に近い部分を抜く強さ（毛や体も消える場合があります）';
  const range=document.createElement('input');range.type='range';range.min='0';range.max='100';range.value='16';range.setAttribute('aria-label',`${index+1}枚目の背景除去の強さ`);label.append(range);
  const hint=text('p','元画像の背景をタップすると背景色を指定できます。最初は左上の色を使用します。');let point={x:0,y:0};
- const draw=()=>{result.candidate=edgeCandidate(result.original,Number(range.value),point);views.replaceChildren(viewsFor([['元画像',result.original]],(x,y)=>{point={x,y};hint.textContent=`背景色の指定位置 (${x}, ${y})。輪郭と残りを確認してください。`;draw();}),viewsFor([['暗背景',result.candidate]]));};
+ const draw=()=>{if(aiProvenance)invalidate();result.candidate=edgeCandidate(result.original,Number(range.value),point);views.replaceChildren(viewsFor([['元画像',result.original]],(x,y)=>{point={x,y};hint.textContent=`背景色の指定位置 (${x}, ${y})。輪郭と残りを確認してください。`;draw();}),viewsFor([['暗背景',result.candidate]]));};
  range.oninput=draw;draw();
  const save=text('button','生成元PNGを保存');save.type='button';save.onclick=async()=>{try{download(await png(result.original),`generated-${String(index+1).padStart(2,'0')}.png`,'image/png');}catch(e){$('aiStatus').textContent=e.message;}};
- card.append(views,hint,label,save);$('aiGallery').append(card);
+ const phraseLabel=document.createElement('label');phraseLabel.textContent='スタンプの文字（30文字以内）';const phrase=document.createElement('input');phrase.type='text';phrase.maxLength=60;phrase.value=result.phrase;phrase.setAttribute('aria-label',`${index+1}枚目のセリフ`);phrase.oninput=()=>{if(aiProvenance)invalidate();result.phrase=phrase.value;};phraseLabel.append(phrase);
+ card.append(views,hint,label,phraseLabel,save);$('aiGallery').append(card);
 }
 $('aiGenerate').onclick=async()=>{
  if(aiRun)return;
@@ -359,6 +360,7 @@ $('aiUse').onclick=async()=>{
  if(aiRun||aiResults.length!==Number($('aiCount').value)||aiDescription!==$('aiDescription').value.trim())return;
  $('aiUse').disabled=true;
  try{
+  if(aiResults.some(r=>Array.from(r.phrase).length>30))throw Error('セリフを各30文字以内にしてください。');
   invalidate();const token=generation,next=[];
   for(let i=0;i<aiResults.length;i++){const r=aiResults[i],o=r.original,c=r.candidate;next.push(await makeNativeItem(i,o,c,r.phrase,{x:0,y:0,width:o.width,height:o.height}));}
   if(token!==generation)return;items=next;
