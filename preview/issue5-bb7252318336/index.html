@@ -1,0 +1,722 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-qKfM/7iMEenue0vggHp5u1wIfeTsVAPb3vf1G+601Bk='; style-src 'sha256-naKP5GGmWXUk+TMb4YCvTiUQjyLaqxOCKhholxGHrTw='; img-src blob: data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"><title>スタンプ工房</title><style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#263b32;background:#f3f2e9;line-height:1.7}body{margin:0}main{max-width:1000px;margin:auto;padding:24px}header{padding:28px 0}header p:first-child{font-size:12px;letter-spacing:.18em;color:#527660}h1{font-size:clamp(30px,7vw,48px);margin:8px 0}h2{font-size:22px}section{background:white;border:1px solid #dedfd3;border-radius:18px;margin:24px 0;padding:24px}aside{background:#f5e5b8;border-radius:12px;padding:16px}label{display:block;margin:14px 0}input,select,textarea,button{font:inherit;max-width:100%;box-sizing:border-box}input[type=file],textarea{display:block;width:100%;padding:12px;border:1px solid #b6c2b7;border-radius:8px}input[type=number]{width:80px;padding:8px}.row{display:flex;gap:20px;flex-wrap:wrap}button{border:0;border-radius:10px;padding:13px 20px;background:#285b45;color:white;cursor:pointer}button:disabled{background:#a5afa7;cursor:default}.card{border-top:1px solid #ddd;padding:20px 0}.previews{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.previews canvas{width:100%;height:auto;max-height:300px;object-fit:contain;image-rendering:auto}.previews figure{margin:0;min-width:0}.previews figcaption{font-size:13px}.check{display:flex;align-items:flex-start;gap:12px}input[type=checkbox]{width:24px;height:24px;flex-shrink:0}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}footer{font-size:13px;color:#586458}@media(max-width:480px){main{padding:14px}section{padding:16px}.row{gap:12px}}
+.final-card{border-top:1px solid #ddd;padding:16px 0}.previews canvas{max-height:none;display:block;cursor:crosshair}input[type=text]{width:100%;padding:10px;border:1px solid #b6c2b7;border-radius:8px}.final-card .previews canvas{cursor:default}
+
+#masterPreview{max-width:100%;max-height:240px;object-fit:contain}#planList{max-height:350px;overflow:auto}#planList p{border-bottom:1px solid #dedfd3;padding:8px 0}
+
+.download-link{display:block;padding:12px;margin:8px 0;overflow-wrap:anywhere;color:#20583e}.card,.final-card{content-visibility:auto;contain-intrinsic-size:auto 900px}
+
+.zoom{width:calc(100vw - 48px);max-width:1000px;max-height:85vh;border:1px solid #b6c2b7;border-radius:12px}.zoom .previews{display:block;overflow:auto}.zoom .previews canvas{width:auto;max-width:none}.zoom::backdrop{background:#0008}#zoomTools{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+
+#workflowGuide nav{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}#workflowGuide nav a{padding:8px;color:#20583e}#workflowGuide[data-state=failed],#workflowGuide[data-state=error]{border:2px solid #b94c35}section,.card,.final-card{scroll-margin-top:16px}#nextAction{font-weight:600}
+
+#previewNotice{border:2px solid #b77918;background:#fff0c7;margin-bottom:16px}#previewNotice p{margin:8px 0}#buildRevision{font-size:13px;overflow-wrap:anywhere}
+
+
+/* Issue #5 — welcoming mobile-first studio shell. QA controls retain their IDs. */
+:root{--ink:#4e3d49;--muted:#7b6c77;--rose:#b76586;--rose-dark:#934b6b;--blush:#fff0f2;--cream:#fffaf6;--stroke:#eadfe6;--mint:#e7f0e9;--shadow:0 10px 35px rgba(103,66,93,.07);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:#fcf8f6;color:var(--ink);line-height:1.75}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse 80% 260px at 4% 0%,#ffe7ed 0%,transparent 95%),radial-gradient(ellipse 60% 380px at 100% 380px,#f1ebfa 0%,transparent 95%),#fcf8f6;color:var(--ink)}
+main{max-width:920px;padding:clamp(14px,4vw,28px);margin:0 auto}
+.studio-header{padding:20px 6px 26px}.studio-header .eyebrow{font-size:12px;letter-spacing:.22em;font-weight:800;color:var(--rose-dark)}.studio-header h1{font-size:clamp(29px,7.8vw,48px);letter-spacing:-.035em;line-height:1.3;margin:8px 0 6px}.studio-header h1 span{color:#d797a8}.studio-header>p:not(.eyebrow){margin:4px 0}.studio-header .header-subtitle{font-size:14px;color:var(--muted)}
+section{background:#fff;border:1px solid var(--stroke);border-radius:26px;margin:20px 0;padding:clamp(20px,5vw,30px);box-shadow:var(--shadow);scroll-margin-top:95px}
+section h2{font-size:clamp(22px,5vw,28px);line-height:1.4;margin:5px 0 15px;color:#523b4c}section h3{font-size:20px;line-height:1.4}
+.section-kicker,.mini-tag{display:inline-flex;align-items:center;background:#fae9ef;color:var(--rose-dark);border-radius:100px;padding:4px 12px;font-weight:800;font-size:12px;letter-spacing:.05em}
+aside{border-radius:18px;padding:14px 18px;color:#635669;background:#f6f0f8}
+#previewNotice{border:1px solid #ead2df;background:#fff1f6;padding:13px 16px;margin-bottom:16px;font-size:13px}
+#previewNotice strong{color:#a34f70}#previewNotice p{margin:5px 0}
+main>aside:not(#previewNotice){font-size:12px;line-height:1.6;background:#f4f0f2;color:#776b75}
+#studioWelcome{border:1px solid #efccd8;background:linear-gradient(135deg,#fff 0%,#fff5f8 100%);padding:25px}
+#studioWelcome h2{margin:9px 0}#studioWelcome p{color:#796977;margin:6px 0 20px}
+.start-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.start-choice{background:#fff;border:1.5px solid #ead6de;border-radius:22px;display:flex;flex-direction:column;align-items:flex-start;text-align:left;color:var(--ink);padding:20px;gap:5px;min-height:185px;box-shadow:0 5px 18px #b27e9811;cursor:pointer}
+.start-choice:hover,.start-choice:focus-visible{border-color:var(--rose);box-shadow:0 4px 22px #b27e982e}
+.choice-icon{display:grid;place-items:center;width:43px;height:43px;border-radius:15px;background:#fce7ef;color:#ab6280;font-size:29px;font-weight:700}
+.start-choice:nth-child(2) .choice-icon{background:#e5eee7;color:#62836f}
+.start-choice strong{font-size:17px;line-height:1.45}.start-choice small{font-size:12px;color:#81707d;line-height:1.5}.choice-link{margin-top:auto;color:var(--rose-dark);font-size:13px;font-weight:800}
+.subtle-link{margin-top:18px!important;background:transparent!important;color:var(--rose-dark)!important;text-decoration:underline;padding:8px 0!important;font-size:14px}
+.journey-bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:6px;overflow-x:auto;padding:10px 8px;margin:0 -8px;border-radius:18px;background:rgba(255,250,252,.96);box-shadow:0 3px 16px #50334615;scrollbar-width:none}.journey-bar::-webkit-scrollbar{display:none}
+.journey-item{flex:1 0 auto;text-align:center;white-space:nowrap;font-size:12px;color:#91828c;background:#f7f2f6;padding:8px 10px;border-radius:100px;font-weight:700}
+.journey-item.is-active{background:var(--rose);color:white;box-shadow:0 3px 10px #b7658633}.journey-item.is-done{background:#e7f2eb;color:#47705c}
+#workflowGuide{border:1.5px solid #e7c1d0;background:#fffcfd}#nextAction{font-size:18px;line-height:1.6;color:#61425a}#reviewProgress{font-size:13px;color:#796c76}
+#workflowGuide nav{gap:6px;margin-top:14px}#workflowGuide nav a{display:inline-flex;border-radius:100px;background:#faf2f6;color:#8d5872;padding:7px 13px;text-decoration:none;font-size:12px}
+button,.link-button{font:inherit;min-height:46px;background:var(--rose);color:white;border:0;border-radius:15px;padding:12px 20px;cursor:pointer;font-weight:750;box-shadow:none;transition:background .18s ease,transform .18s ease}
+button:hover:not(:disabled){background:var(--rose-dark)}button:active:not(:disabled){transform:scale(.99)}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #bf7599;outline-offset:3px}
+button:disabled{background:#d6cbd1;color:#766975;cursor:default}
+.secondary-button{background:#fbecf1!important;border:1px solid #ddaac0!important;color:var(--rose-dark)!important}
+.link-button{display:inline-flex;text-align:center;align-items:center;justify-content:center;text-decoration:none;background:#eee6f4;color:#6f5079}
+.link-button:hover{background:#e7dcef}
+input,select,textarea{font:inherit;color:var(--ink)}input[type=file],input[type=text],input[type=number],select,textarea{border:1.5px solid #e7dce3;border-radius:13px;background:#fff;min-height:46px;padding:12px;width:100%;max-width:100%}input[type=number]{width:75px}
+input[type=file]{padding:10px;font-size:14px}input[type=file]::file-selector-button{background:#f9e9f0;color:#96566d;border:0;border-radius:9px;padding:9px 12px;font-size:13px;font-weight:700;margin-right:8px}
+textarea{resize:vertical}label{font-weight:650;color:#5c4c57;margin:18px 0 9px}label>input,label>textarea,label>select{margin-top:7px}label.check{font-weight:450;line-height:1.6;background:#fff9fb;border:1px solid #f1e7ee;border-radius:14px;padding:12px;margin:10px 0}
+label.check input{accent-color:var(--rose)}
+#masterPreview{border-radius:15px;background:#faf7f6;padding:8px;border:1px solid var(--stroke)}
+#planList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-height:none;overflow:visible}
+#planList p{background:#fcf6f9;border:1px solid #efdeea;padding:15px;border-radius:16px;margin:0;font-size:14px;line-height:1.7}
+#planList .plan-number{display:inline-block;color:#ad5c7e;font-size:12px;font-weight:900;letter-spacing:.08em;margin-bottom:5px}
+#planList .plan-phrase{display:block;font-size:17px;color:#523c4b;font-weight:800}
+#planList .plan-expression{display:block;font-size:12px;color:#7e727b}
+#planList .plan-edit{margin-top:9px;min-height:36px;padding:6px 12px;font-size:12px;background:#fff;color:#a05b78;border:1px solid #e8cddd}
+#planList .plan-fields{display:block;margin-top:10px}#planList .plan-fields label{font-size:12px;margin:6px 0}#planList .plan-fields input{font-size:13px;min-height:38px;padding:7px}
+#planList .plan-fields button{font-size:12px;min-height:38px;padding:8px 12px;margin-top:7px}
+#planList .plan-fields[hidden]{display:none}
+.handoff-card{margin-top:22px;background:linear-gradient(140deg,#fff4f8,#f7f4fd);border:1.5px solid #ebc9d9;border-radius:22px;padding:20px}
+.handoff-card[hidden]{display:none}.handoff-card h3{margin:10px 0}.handoff-card p{font-size:14px}
+.handoff-actions{display:flex;flex-wrap:wrap;gap:9px}.handoff-actions>*{flex:1 1 190px}.handoff-card .secondary-button{width:100%}
+.soft-instruction{background:#fff3f8;border-radius:15px;padding:14px 16px;border:1px solid #f3dfeb;line-height:1.65}
+.technical-details{margin:18px 0;padding:14px;background:#f8f5f8;border:1px solid #eee5ea;border-radius:14px}
+.technical-details summary{color:#795f70;cursor:pointer}
+.technical-file-option{background:#faf9fa;padding:12px;border-radius:14px;font-size:13px;color:#786b74}
+.muted-note{color:#827681;font-size:12px;line-height:1.65}
+#status{background:#f5f7f3;border-radius:14px;padding:14px;font-size:14px;color:#647267}
+.card,.final-card{border:1px solid #eee1e9;border-radius:20px;padding:16px;margin:15px 0;background:#fff;box-shadow:0 3px 14px #4c35440b}
+.card h3,.final-card h3{color:#a15878;font-size:18px}
+.previews{gap:8px}.previews figure{background:#faf7f9;border-radius:12px;overflow:hidden;padding:7px}.previews figcaption{color:#716674;font-size:12px;margin-top:3px}.previews canvas{border-radius:6px}
+.card details{background:#faf7f9;border-radius:12px;padding:12px;margin-top:12px}.card pre{font-size:11px;color:#665a64}
+#outputStep button,#imageImport #analyze,#planning #plan{font-size:15px}
+.download-link{background:#f3ecf6;color:#744e75;border-radius:12px;padding:13px;margin:10px 0}
+.zoom{border-radius:22px;border:1px solid #f1d6e2}
+footer{font-size:12px;color:#847784}
+@media(max-width:480px){
+ main{padding:13px}section{padding:18px;margin:15px 0;border-radius:22px}
+ .start-choices{grid-template-columns:1fr}.start-choice{min-height:0;display:grid;grid-template-columns:46px 1fr;column-gap:10px;padding:15px;align-items:center}
+ .start-choice .choice-icon{grid-row:span 3}.start-choice strong{font-size:16px}.start-choice small{font-size:12px}
+ .start-choice .choice-link{margin:0}.journey-bar{margin:0 -5px;top:0}.journey-item{font-size:11px;padding:8px 9px}
+ #planList{grid-template-columns:1fr}.handoff-actions{display:grid;grid-template-columns:1fr}
+ .row{gap:10px}.row label{margin:8px 0}.previews{gap:8px}
+ #workflowGuide #nextStep,#imageImport #analyze,#planning #plan,#outputStep #prepare,#outputStep #export{width:100%}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}button{transition:none}}
+
+</style></head><body><main><header class="studio-header"><p class="eyebrow">ASAHI STAMP STUDIO ✳</p><h1>わたしのスタンプ工房 <span aria-hidden="true">♡</span></h1><p>好きな子から、毎日使いたいスタンプへ。</p><p class="header-subtitle">画像を選んで、イメージを伝えるだけ。ひとつずつ一緒に進めましょう。</p></header><aside id="previewNotice" aria-label="検証版の確認状況"><strong>検証用プレビュー</strong> · <span id="buildRevision">bb7252318336</span><p>iPhone実機Safari：未確認<br>LINE公式規格：最新版未照合・申請用ZIPは停止中</p><p>本番公開版とは別の検証版です。画像は端末内で処理します。まず「お試し画像で操作する」で保存まで確認してください。</p></aside><aside>画像生成はChatGPTと手動受け渡し。画像はこのブラウザ内で処理します。自動MATTE品質判定は未確立です。写真を外部へ送信しません。均一背景の透過候補と境界の機械検査に対応。複雑な背景・原本同一性・文字の欠字は目視確認が必要です。問題あり・確認前は出力を停止します。公式最新版を照合できるまで申請可能とは表示しません。</aside><section id="studioWelcome" aria-labelledby="studioWelcomeTitle"><div class="welcome-top"><span class="mini-tag">はじめよう ✨</span><h2 id="studioWelcomeTitle">どこから作る？</h2><p>マスター画像がある人も、すでに8個並んだ画像がある人も、ここから始められます。</p></div><div class="start-choices"><button id="startFromMaster" type="button" class="start-choice"><span class="choice-icon" aria-hidden="true">♡</span><strong>マスター画像から作る</strong><small>写真やキャラクターから企画する</small><span class="choice-link">ここからはじめる →</span></button><button id="startFromSheet" type="button" class="start-choice"><span class="choice-icon" aria-hidden="true">✿</span><strong>すでに画像ができている</strong><small>4列×2行などの画像を取り込む</small><span class="choice-link">画像を取り込む →</span></button></div><button id="tryDemoJourney" type="button" class="subtle-link">まずはお試し画像で動きを見る</button></section><div id="journeyBar" class="journey-bar" aria-label="制作の進み具合"><span class="journey-item" data-journey="plan">① 企画</span><span class="journey-item" data-journey="create">② 画像を作る</span><span class="journey-item" data-journey="import">③ 画像を入れる</span><span class="journey-item" data-journey="review">④ 確認</span><span class="journey-item" data-journey="save">⑤ 保存</span></div><section id="workflowGuide" aria-labelledby="guideTitle"><div class="section-kicker">いまここから進もう</div><h2 id="guideTitle">次にやること</h2><p id="nextAction" role="status" aria-live="polite">マスター画像と希望から企画するか、生成済みの原寸画像を取り込んでください。</p><p id="reviewProgress"></p><button id="nextStep" type="button">企画から始める</button> <button id="cancelProcess" type="button" disabled>処理を中止</button><nav aria-label="制作工程"><a href="#planning">企画</a><a href="#imageImport">画像取込み</a><a href="#qualityReview">品質確認</a><a href="#outputStep">PNG・ZIP</a></nav><p class="muted-note">画像・品質確認は再読込みで失われます。必要な企画・診断・PNGは保存してください。写真を自動保存・送信することはありません。</p></section><section id="planning"><div class="section-kicker">STEP 1 / あなたのアイデア</div><h2>どんなスタンプにする？</h2><p>希望からセリフ・表情・ポーズを提案します。画像生成はChatGPTで行い、このアプリには生成した原寸画像を戻します。</p><label>キャラクターのマスター写真・イラスト<input id="master" type="file" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp"></label><img id="masterPreview" alt="マスター画像の確認" hidden><label>使う場面や雰囲気<textarea id="wish" rows="2" maxlength="500" placeholder="かわいい感じで、仕事でも使いたい"></textarea></label><label>必ず残したい特徴<input id="identity" type="text" maxlength="500" placeholder="例：垂れ耳、赤い首輪。空欄なら添付原本を基準にします"></label><p>下の「枚数」で8・16・24・32・40個を選べます。</p><button id="plan" type="button">企画を自動提案</button><p id="planStatus" role="status" aria-live="polite"></p><div id="planList"></div><div id="planHandOff" class="handoff-card" hidden><span class="mini-tag">STEP 2 / 画像を作ろう ✨</span><h3>スタンプ案ができたよ！</h3><p>セリフや表情を見て、気になるところは「編集」してね。よければChatGPTへ渡す文章をコピーしましょう。</p><div class="handoff-actions"><button type="button" id="journeyCopyPrompt">画像生成の指示文をコピー</button><a id="journeyOpenChatGPT" class="link-button" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTを開く ↗</a></div><p class="handoff-instruction"><strong>画像ができたら</strong>、ChatGPTで保存して、このアプリに戻ってきてね。</p><button type="button" id="journeyImportSheet" class="secondary-button">できた画像を取り込む →</button><p class="muted-note">マスター画像はChatGPT側でも添付してね。ChatGPTの画像生成と外部アプリは自動連携していません。</p></div><details class="technical-details"><summary>指示文を自分で確認・編集したい場合</summary><summary>ChatGPTへ渡す完成指示文</summary><textarea id="generationPrompt" rows="10" readonly aria-label="画像生成指示文"></textarea></details><button id="copyPrompt" type="button" disabled>指示文をコピー</button> <button id="savePlan" type="button" disabled>企画と指示文を保存</button><p>①指示文をコピー → ②ChatGPTにマスター画像と一緒に貼り付け → ③生成した原寸PNGを保存して下で取り込み。ChatGPTの利用枠が適用されます。外部アプリから契約中の画像生成機能を直接呼び出す接続はありません。有料APIは使いません。文字はこのアプリで後から入れます。</p><p>企画の入力は端末内に自動保存します。写真は保存・送信しません。画像生成時のマスター添付はChatGPTで行ってください。</p></section><section id="imageImport"><div class="section-kicker">STEP 3 / 画像ができたら</div><h2>できあがった画像を入れよう</h2><p class="soft-instruction">ここには<strong>マスター画像ではなく、ChatGPTが作ったスタンプ候補の一覧画像</strong>を選んでね。</p><p>生成した原寸シートを選択してください。候補PNGを省略すると、均一背景から透過候補を作成します（複雑な写真背景は対応外）。透明PNGは透過を保ちます。行列で均等に分割し、欠け・混入の疑いを診断します。</p><label>ChatGPTで作ったスタンプ一覧画像（PNG・JPEG）<input id="original" type="file" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp"></label><label class="technical-file-option">すでに別で作った透過画像（PNG・通常は選択不要）<input id="candidate" type="file" accept="image/png,.png"></label><div class="row"><label>枚数<select id="count"><option>8</option><option>16</option><option>24</option><option>32</option><option>40</option></select></label><label>列<input id="cols" type="number" min="1" max="40" value="4"></label><label>行<input id="rows" type="number" min="1" max="40" value="2"></label></div><label>セリフ（各行1枚・最大30文字。画像の下側に描画）<textarea id="phrases" rows="3" placeholder="ありがとう&#10;おつかれさま"></textarea></label><button id="analyze">透過候補を作って分割・診断</button> <button id="demo" type="button">お試し画像で操作する</button><p class="muted-note">お試し画像はこの端末で作る8個の図形です。実画像や過去のQA検証結果ではありません。</p></section><section id="qualityReview"><div class="section-kicker">STEP 4 / 仕上がりチェック</div><h2>スタンプを1枚ずつ確認しよう</h2><p id="qualitySimple" class="soft-instruction" role="status" aria-live="polite">画像を取り込むと、ここで8枚ずつ確認できます。</p><p>自動検査は透過・空画像・可視RGB変更を検出し、alpha分布・境界接触・8近傍の連結成分を記録します。色だけで残留や欠損を断定できません。各画像を拡大し、元画像・alpha・明暗背景で確認してください。座標は各セル左上が(0,0)です。</p><p id="status" role="status" aria-live="polite">画像未取込み → 分割未実行 → MATTE未検証 → ZIP停止</p><div id="cards"></div><button id="diagnostic" disabled>診断JSONを保存</button> <button id="evidence" disabled>画素証拠ZIPを保存（申請用ではありません）</button></section><section id="outputStep"><div class="section-kicker">STEP 5 / いよいよ完成</div><h2>仕上げて保存しよう</h2><p>native matteをSHA-256付きで保全し、確認後にリサイズ・セリフ描画します。main/tabは1枚目のnative matteから作成します。加工後の明暗プレビューを全件確認してからZIPを出力できます。ZIPを再読込みし、CRC・全ファイルの名前・寸法・透過・サイズを検査します。</p><label class="check"><input id="official" type="checkbox">LINE公式ページを開き、下記の枚数・寸法・形式・容量・解像度が最新規格と一致することを確認しました（利用者による確認として記録）。</label><p><a href="https://creator.line.me/ja/guideline/sticker/" target="_blank" rel="noopener noreferrer">LINE公式の制作ガイドラインを開く</a>。開発環境では通信制限のため最新版を未取得です。検査値：8/16/24/32/40枚、スタンプ最大370×320、main 240×240、tab 96×74、偶数寸法、透過RGBA PNG、72dpi以上、各1MB以下、ZIP60MB以下。前景を切らず、外周に10pxの余白を確保します。</p><button id="prepare" disabled>加工して最終プレビューを作成</button><div id="finalCards"></div><button id="export" disabled>規格検査用ZIPを保存（申請可否は未確認）</button><p id="exportStatus" role="status"></p><button id="submission" disabled>申請用ZIP（公式照合待ち）</button><p id="submissionStatus" role="status" aria-live="polite">規格照合と全件の品質確認が必要です。</p></section><section><h2>保存したファイル</h2><p>保存が始まらない場合は、下のリンクをもう一度タップしてください。Safariで表示された場合は共有メニューから「ファイルに保存」を選べます。リンクは直近3件を保持し、入力変更時に消えます。</p><div id="downloadLinks"></div></section><footer>自動PASSは表示しません。人間の確認も画質の保証ではありません。画像と品質確認は保存されないため診断をダウンロードしてください。企画の入力だけ端末内に保存します。</footer></main><dialog id="zoomDialog" class="zoom"><button id="zoomClose" type="button">閉じる</button><h2 id="zoomTitle"></h2><div id="zoomTools"></div><div id="zoomViews"></div></dialog><script>
+// src/sha256.js
+// SHA-256, FIPS 180-4. Used when WebCrypto is unavailable on a private HTTP LAN.
+// This computes an integrity digest; it does not provide transport encryption.
+const K = new Uint32Array([
+  0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+  0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+  0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+  0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+  0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+  0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+  0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+  0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2
+]);
+const rotate=(x,n)=>(x>>>n)|(x<<(32-n));
+function sha256Fallback(input) {
+  const data=new Uint8Array(Math.ceil((input.length+9)/64)*64);data.set(input);data[input.length]=0x80;
+  const view=new DataView(data.buffer);view.setUint32(data.length-8,Math.floor(input.length/0x20000000));view.setUint32(data.length-4,(input.length*8)>>>0);
+  const state=new Uint32Array([0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19]),w=new Uint32Array(64);
+  for(let offset=0;offset<data.length;offset+=64){
+    for(let i=0;i<16;i++)w[i]=view.getUint32(offset+i*4);
+    for(let i=16;i<64;i++){const x=w[i-15],y=w[i-2],s0=rotate(x,7)^rotate(x,18)^(x>>>3),s1=rotate(y,17)^rotate(y,19)^(y>>>10);w[i]=(w[i-16]+s0+w[i-7]+s1)>>>0;}
+    let [a,b,c,d,e,f,g,h]=state;
+    for(let i=0;i<64;i++){
+      const s1=rotate(e,6)^rotate(e,11)^rotate(e,25),choose=(e&f)^(~e&g),t1=(h+s1+choose+K[i]+w[i])>>>0;
+      const s0=rotate(a,2)^rotate(a,13)^rotate(a,22),majority=(a&b)^(a&c)^(b&c),t2=(s0+majority)>>>0;
+      h=g;g=f;f=e;e=(d+t1)>>>0;d=c;c=b;b=a;a=(t1+t2)>>>0;
+    }
+    for(const [i,value] of [a,b,c,d,e,f,g,h].entries())state[i]=(state[i]+value)>>>0;
+  }
+  const output=new Uint8Array(32),outView=new DataView(output.buffer);for(let i=0;i<8;i++)outView.setUint32(i*4,state[i]);return output;
+}
+async function sha256(input){return globalThis.crypto?.subtle?new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256',input)):sha256Fallback(input);}
+
+// src/matte.js
+// Geometry and alpha measurements are evidence, never semantic defect labels.
+function alphaEvidence(rgba, width, height, limit = 100) {
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 || rgba.length !== width * height * 4) throw Error('画素寸法が一致しません');
+  const histogram = Array(256).fill(0), visited = new Uint8Array(width * height);
+  let borderPixels = 0, componentCount = 0;
+  const components = [], queue = new Int32Array(width * height);
+  for (let i = 0; i < visited.length; i++) {
+    const a = rgba[i * 4 + 3]; histogram[a]++;
+    const x = i % width, y = Math.floor(i / width);
+    if (a && (x === 0 || y === 0 || x === width - 1 || y === height - 1)) borderPixels++;
+  }
+  for (let seed = 0; seed < visited.length; seed++) {
+    if (visited[seed] || !rgba[seed * 4 + 3]) continue;
+    let head = 0, tail = 1, minX = width, minY = height, maxX = 0, maxY = 0, alphaSum = 0;
+    queue[0] = seed; visited[seed] = 1;
+    while (head < tail) {
+      const i = queue[head++], x = i % width, y = Math.floor(i / width);
+      minX = Math.min(minX,x); minY = Math.min(minY,y); maxX = Math.max(maxX,x); maxY = Math.max(maxY,y); alphaSum += rgba[i * 4 + 3];
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const nx = x + dx, ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+        const next = ny * width + nx;
+        if (!visited[next] && rgba[next * 4 + 3]) { visited[next] = 1; queue[tail++] = next; }
+      }
+    }
+    componentCount++;
+    if (components.length < limit) components.push({id:componentCount,pixels:tail,alphaSum,bounds:{x:minX,y:minY,width:maxX-minX+1,height:maxY-minY+1},semanticQuality:'UNKNOWN'});
+  }
+  return {alphaHistogram:histogram,borderPixels,connectivity:8,componentCount,components,componentsTruncated:componentCount>components.length,note:'alpha>0を8近傍で集計。小成分・境界接触は欠陥の確定ではなく確認位置の証拠。'};
+}
+function compositePixel(rgba, background) {
+  const alpha = rgba[3] / 255;
+  return rgba.slice(0,3).map((c,i) => Math.round(c*alpha+background[i]*(1-alpha)));
+}
+function samplePixel(original,candidate,width,height,x,y) {
+  if (!Number.isInteger(x)||!Number.isInteger(y)||x<0||y<0||x>=width||y>=height||original.length!==width*height*4||candidate.length!==original.length) throw Error('画素座標が範囲外です');
+  const p=(y*width+x)*4, rgba=Array.from(candidate.slice(p,p+4));
+  const dark=compositePixel(rgba,[24,24,24]),light=compositePixel(rgba,[255,255,255]);
+  return {x,y,originalRGBA:Array.from(original.slice(p,p+4)),candidateRGBA:rgba,darkRGB:dark,lightRGB:light,removalImpactMaxChannel:Math.max(...dark.map(c=>Math.abs(c-24)),...light.map(c=>Math.abs(c-255))),semanticQuality:'UNKNOWN',note:'指定背景・原寸の1画素の計算値。削除許可、不可視性、リサイズ後の上限を意味しない。'};
+}
+async function rgbaHash(rgba,width,height) {
+  if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||rgba.length!==width*height*4)throw Error('画素寸法が一致しません');
+  const bytes=new Uint8Array(8+rgba.length),view=new DataView(bytes.buffer);
+  view.setUint32(0,width,true);view.setUint32(4,height,true);bytes.set(rgba,8);
+  return Array.from(await sha256(bytes),b=>b.toString(16).padStart(2,'0')).join('');
+}
+// Evaluation reports abstentions separately. Ground truth must come from controlled edits,
+// not from the implementation's own diagnostic output.
+function calibrationMetrics(cases) {
+  let truePositive=0,falsePositive=0,trueNegative=0,falseNegative=0,unknownDefect=0,unknownClean=0;
+  if (!cases.length) throw Error('対照がありません');
+  for (const c of cases) {
+    if(typeof c.defect!=='boolean'||!['DEFECT','CLEAN','UNKNOWN'].includes(c.prediction))throw Error('校正ラベルが不正です');
+    if(c.prediction==='UNKNOWN'){if(c.defect)unknownDefect++;else unknownClean++;}
+    else if(c.prediction==='DEFECT'){if(c.defect)truePositive++;else falsePositive++;}
+    else if(c.defect)falseNegative++;else trueNegative++;
+  }
+  const positives=truePositive+falseNegative+unknownDefect,negatives=falsePositive+trueNegative+unknownClean;
+  return {total:cases.length,truePositive,falsePositive,trueNegative,falseNegative,unknownDefect,unknownClean,sensitivity:positives?truePositive/positives:null,falsePositiveRate:negatives?falsePositive/negatives:null,unknownRate:(unknownDefect+unknownClean)/cases.length,decidedCoverage:1-(unknownDefect+unknownClean)/cases.length,qualityCapability:'UNVERIFIED'};
+}
+
+// src/core.js
+const COUNTS=[8,16,24,32,40];
+function gridPreset(count){const grids={8:[4,2],16:[4,4],24:[6,4],32:[8,4],40:[8,5]};if(!grids[count])throw Error('対応していない枚数です');return grids[count];}
+function gridRects(width,height,cols,rows,count){
+ if(!COUNTS.includes(count)||!Number.isInteger(cols)||!Number.isInteger(rows)||cols<1||rows<1||cols*rows!==count||width<cols||height<rows)throw Error('枚数と行列、画像寸法が一致しません');
+ return Array.from({length:count},(_,i)=>{const x=Math.floor(i%cols*width/cols),y=Math.floor(Math.floor(i/cols)*height/rows);return {x,y,width:Math.floor((i%cols+1)*width/cols)-x,height:Math.floor((Math.floor(i/cols)+1)*height/rows)-y};});
+}
+function diagnose(original,candidate,width,height){
+ if(original.length!==width*height*4||candidate.length!==original.length)throw Error('画素寸法が一致しません');
+ let transparent=0,visible=0,partial=0,rgbChanges=0;const locations=[];let locationCount=0;
+ for(let p=0;p<candidate.length;p+=4){const a=candidate[p+3],index=p/4; if(a===0)transparent++;else visible++;if(a>0&&a<255)partial++;
+ const changed=a>0&&(original[p]!==candidate[p]||original[p+1]!==candidate[p+1]||original[p+2]!==candidate[p+2]);if(changed)rgbChanges++;
+ const x=index%width,y=Math.floor(index/width);if(changed||(a>0&&(x===0||y===0||x===width-1||y===height-1))){locationCount++;if(locations.length<100)locations.push({x,y,reason:changed?'VISIBLE_RGB_CHANGED':'VISIBLE_AT_BORDER',alpha:a});}
+ }
+ const failures=[];if(!transparent)failures.push('NO_TRANSPARENCY');if(!visible)failures.push('EMPTY_FOREGROUND');if(rgbChanges)failures.push('VISIBLE_RGB_CHANGED');
+ return {status:failures.length?'FAIL':'REVIEW_REQUIRED',width,height,transparent,visible,partial,rgbChanges,failures,locations,locationsTruncated:locationCount>locations.length,locationCount,geometry:alphaEvidence(candidate,width,height),semanticQuality:'UNKNOWN',nextAction:'暗・明背景で縁欠損と背景残留を元画像と比較してください。不明なら承認せず候補を修正して再取込みしてください。'};
+}
+function exportAllowed(items,officialConfirmed){return officialConfirmed&&items.length>0&&COUNTS.includes(items.length)&&items.every(i=>i.qc.status==='REVIEW_REQUIRED'&&i.review===true);}
+function crc32(bytes){let c=0xffffffff;for(const b of bytes){c^=b;for(let k=0;k<8;k++)c=(c>>>1)^((c&1)?0xedb88320:0);}return (c^0xffffffff)>>>0;}
+const enc=new TextEncoder();
+function zipStore(files){
+ let offset=0;const chunks=[],central=[];
+ for(const {name,data} of files){const n=enc.encode(name),crc=crc32(data),h=new Uint8Array(30+n.length),v=new DataView(h.buffer);v.setUint32(0,0x04034b50,true);v.setUint16(4,20,true);v.setUint32(14,crc,true);v.setUint32(18,data.length,true);v.setUint32(22,data.length,true);v.setUint16(26,n.length,true);h.set(n,30);chunks.push(h,data);
+ const c=new Uint8Array(46+n.length),d=new DataView(c.buffer);d.setUint32(0,0x02014b50,true);d.setUint16(4,20,true);d.setUint16(6,20,true);d.setUint32(16,crc,true);d.setUint32(20,data.length,true);d.setUint32(24,data.length,true);d.setUint16(28,n.length,true);d.setUint32(42,offset,true);c.set(n,46);central.push(c);offset+=h.length+data.length;}
+ const size=central.reduce((s,c)=>s+c.length,0),end=new Uint8Array(22),e=new DataView(end.buffer);e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,size,true);e.setUint32(16,offset,true);
+ const out=new Uint8Array(offset+size+22);let p=0;for(const c of [...chunks,...central,end]){out.set(c,p);p+=c.length;}return out;
+}
+function readZip(bytes){
+ const v=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength),out=[],records=[];let p=0;
+ while(p+4<=bytes.length&&v.getUint32(p,true)===0x04034b50){
+  if(p+30>bytes.length)throw Error('ZIP truncated');
+  const flags=v.getUint16(p+6,true),method=v.getUint16(p+8,true),size=v.getUint32(p+18,true),n=v.getUint16(p+26,true),extra=v.getUint16(p+28,true),start=p+30+n+extra,end=start+size;
+  if(flags!==0||method!==0||v.getUint32(p+22,true)!==size)throw Error('Unsupported ZIP format');
+  if(end>bytes.length)throw Error('ZIP truncated');
+  const data=bytes.slice(start,end),name=new TextDecoder().decode(bytes.slice(p+30,p+30+n)),crc=v.getUint32(p+14,true);
+  if(crc32(data)!==crc)throw Error('ZIP CRC mismatch');if(out.some(f=>f.name===name))throw Error('ZIP duplicate name');
+  out.push({name,data});records.push({offset:p,name,size,crc});p=end;
+ }
+ const centralStart=p;
+ for(const record of records){
+  if(p+46>bytes.length||v.getUint32(p,true)!==0x02014b50)throw Error('Invalid ZIP central directory');
+  const n=v.getUint16(p+28,true),extra=v.getUint16(p+30,true),comment=v.getUint16(p+32,true),end=p+46+n+extra+comment;
+  if(end>bytes.length)throw Error('ZIP truncated');
+  const name=new TextDecoder().decode(bytes.slice(p+46,p+46+n));
+  if(name!==record.name||v.getUint16(p+8,true)!==0||v.getUint16(p+10,true)!==0||v.getUint32(p+16,true)!==record.crc||v.getUint32(p+20,true)!==record.size||v.getUint32(p+24,true)!==record.size||v.getUint16(p+34,true)!==0||v.getUint32(p+42,true)!==record.offset)throw Error('ZIP central directory mismatch');
+  p=end;
+ }
+ if(!out.length||p+22>bytes.length||v.getUint32(p,true)!==0x06054b50)throw Error('Invalid ZIP end record');
+ if(v.getUint16(p+4,true)!==0||v.getUint16(p+6,true)!==0||v.getUint16(p+8,true)!==out.length||v.getUint16(p+10,true)!==out.length||v.getUint32(p+12,true)!==p-centralStart||v.getUint32(p+16,true)!==centralStart||p+22+v.getUint16(p+20,true)!==bytes.length)throw Error('ZIP end record mismatch');
+ return out;
+}
+function validateNames(files,count){const expected=[...Array.from({length:count},(_,i)=>String(i+1).padStart(2,'0')+'.png'),'main.png','tab.png'];if(files.length!==expected.length||expected.some((n,i)=>files[i].name!==n))throw Error('ZIP内の枚数・ファイル名が不正です');}
+
+// src/planner.js
+// Deterministic local suggestions: no network, model contract, or API key.
+const phrases=[
+['ありがとう','にっこり','胸に手を添える'],['了解です','きりっと','うなずく'],['おつかれさま','やさしい笑顔','小さく手を振る'],['よろしくお願いします','丁寧な笑顔','おじぎ'],['おはよう','明るい笑顔','両手を上げる'],['こんにちは','穏やか','片手を振る'],['おやすみ','眠そう','丸まって休む'],['ごめんなさい','申し訳なさそう','頭を下げる'],
+['助かります','安心','両手を合わせる'],['確認します','真剣','考える'],['少々お待ちください','落ち着いた表情','手のひらを向ける'],['おめでとう','喜び','飛び跳ねる'],['いいですね','賛成','親指を立てる'],['おかえり','うれしい','両手を広げる'],['いってらっしゃい','応援','大きく手を振る'],['またね','微笑み','振り返る'],
+['大丈夫です','安心させる笑顔','胸を張る'],['承知しました','丁寧','深くうなずく'],['お先に失礼します','控えめな笑顔','会釈'],['無理しないで','心配','そっと手を伸ばす'],['やったー','満面の笑顔','ばんざい'],['応援してます','熱意','こぶしを上げる'],['なるほど','納得','あごに手を当てる'],['お久しぶり','喜び','前に身を乗り出す'],
+['あとで連絡します','穏やか','片手を胸に置く'],['今向かっています','急ぎ','走る'],['到着しました','ほっとした顔','立ち止まる'],['楽しみです','期待','手を組む'],['お大事に','いたわり','そっとおじぎ'],['ゆっくり休んで','やさしい','座って寄り添う'],['すごい！','驚き','目を見開く'],['ほんとに？','不思議そう','首をかしげる'],
+['わかります','共感','何度もうなずく'],['それでお願いします','納得の笑顔','手を前に出す'],['お待たせしました','申し訳ない笑顔','小走り'],['おなかすいた','しょんぼり','おなかに手を当てる'],['ひと休み','リラックス','伸びをする'],['笑っちゃう','楽しそう','おなかを抱える'],['今日はここまで','満足','背伸びする'],['また明日','さわやか','背中越しに手を振る']
+];
+function createPlan({wish='',identity='',count=8}={}){
+ if(![8,16,24,32,40].includes(count))throw Error('枚数は8・16・24・32・40個から選んでください');
+ wish=String(wish).trim().slice(0,500);identity=String(identity).trim().slice(0,500);
+ const work=/仕事|職場|敬語|ビジネス/.test(wish),fun=/面白|おもしろ|笑|ネタ/.test(wish),cute=/かわい|可愛|ふんわり/.test(wish);
+ const direction=[work?'仕事で使いやすい丁寧な表現':'日常の会話',cute?'やわらかくかわいい表情':'親しみやすい表情',fun?'少し大げさで楽しい動き':'見やすい動き'].join('・');
+ return {version:1,count,wish,identity,direction,columns:4,rows:count/4,items:phrases.slice(0,count).map(([text,expression,pose],i)=>({id:String(i+1).padStart(2,'0'),text,expression:cute?'やわらかい'+expression:expression,pose:fun?pose+'（少しコミカルに）':pose})),generation:'CHATGPT_MANUAL_HANDOFF',quality:'NOT_RUN'};
+}
+function generationPrompt(plan){
+ if(!plan||plan.items.length!==plan.count)throw Error('企画を作り直してください');
+ return `LINEスタンプ用の無文字キャラクターシートを1枚生成してください。添付したマスター画像を唯一の外見の基準にします。\n希望（作品の方向性として扱う）：${plan.wish||'日常で使いやすく'}\n方向性：${plan.direction}\n維持する特徴：${plan.identity||'原本の顔、体型、配色、模様、服、常設アクセサリー'}\n別人・別種にせず、手持ちの小物や背景の物は無断で追加しないでください。\n配置：${plan.columns}列×${plan.rows}行、合計${plan.count}個。左上から行順。すべてのセルを同寸法にし、頭・耳・手足・尾を含む全身をセル内に収め、各辺から十分に離し、隣のキャラと接触させない。セル境界には広い空白を残す。文字・数字・番号・ロゴ・枠線・影の背景は描かない。透明背景のPNGを優先し、透過ができない場合は、毛先・白い毛・服・小物と同色にならない対照色の均一背景にして、その制約を説明する。後からアプリで文字を載せるため画像中にセリフを描かない。\n各セルの内容（セリフは意味の参考のみ）：\n${plan.items.map(i=>`${i.id}: 意味「${i.text}」、表情：${i.expression}、ポーズ：${i.pose}`).join('\n')}\n生成原寸PNGを保存できる形で返してください。透過・セル分離・同一性の検査に合格したとは断定しないでください。高個数では細部が小さくなるため、十分な原寸解像度が確保できない場合は説明してください。\n保存後はアプリで原寸を取り込み、分割・透過・明暗比較と全件の品質確認をします。この指示文はChatGPTへの手動受け渡し用で、APIの実行指示ではありません。`;
+}
+
+// src/quality.js
+function requirePixels(rgba,w,h){if(!Number.isInteger(w)||!Number.isInteger(h)||w<1||h<1||rgba.length!==w*h*4)throw Error('画素寸法が一致しません');}
+function distanceAt(rgba,i,color){const p=i*4;return Math.max(Math.abs(rgba[p]-color[0]),Math.abs(rgba[p+1]-color[1]),Math.abs(rgba[p+2]-color[2]));}
+function borderIndices(w,h){const out=[];for(let x=0;x<w;x++){out.push(x);if(h>1)out.push((h-1)*w+x);}for(let y=1;y<h-1;y++){out.push(y*w);if(w>1)out.push(y*w+w-1);}return out;}
+function floodBackground(rgba,w,h,color,tolerance,border,queue){
+ const mask=new Uint8Array(w*h);let head=0,tail=0;
+ const add=i=>{if(!mask[i]&&distanceAt(rgba,i,color)<=tolerance){mask[i]=1;queue[tail++]=i;}};
+ for(const i of border)add(i);
+ while(head<tail){const i=queue[head++],x=i%w,y=Math.floor(i/w);if(x>0)add(i-1);if(x<w-1)add(i+1);if(y>0)add(i-w);if(y<h-1)add(i+w);}
+ return mask;
+}
+function proposeMatte(rgba,w,h){
+ requirePixels(rgba,w,h);const output=new Uint8ClampedArray(rgba),border=borderIndices(w,h);
+ if(rgba.some((v,i)=>i%4===3&&v<255))return {rgba:output,status:'REVIEW_REQUIRED',method:'EXISTING_ALPHA_UNCHANGED',removed:0,uncertain:0,locations:[],note:'既存の透過を保持しました。欠損・残留・半透明の縁を元画像と比較してください。'};
+ const color=[0,1,2].map(k=>{const values=border.map(i=>rgba[i*4+k]).sort((a,b)=>a-b);return values[Math.floor(values.length/2)];});
+ const agreement=border.filter(i=>distanceAt(rgba,i,color)<=8).length/border.length;
+ if(agreement<0.98)return {rgba:output,status:'FAIL',method:'UNSUPPORTED_BACKGROUND',removed:0,uncertain:0,locations:[],color,borderAgreement:agreement,note:'外周が均一な背景ではありません。背景を残した元画像は変更していません。透過済みPNGを取り込むか、均一背景で生成し直してください。'};
+ const queue=new Int32Array(w*h),strict=floodBackground(rgba,w,h,color,0,border,queue),loose=floodBackground(rgba,w,h,color,16,border,queue);let removed=0,uncertain=0;const locations=[];
+ for(let i=0;i<w*h;i++){if(strict[i]){output[i*4+3]=0;removed++;}else if(loose[i]){uncertain++;if(locations.length<100)locations.push({x:i%w,y:Math.floor(i/w),reason:'AMBIGUOUS_BACKGROUND_COLOR',action:'KEEP_ORIGINAL_PIXEL'});}}
+ if(removed===w*h)return {rgba:new Uint8ClampedArray(rgba),status:'FAIL',method:'NO_SEPARABLE_FOREGROUND',removed:0,uncertain,locations,color,borderAgreement:agreement,note:'背景と前景を分離できません。画像を消さず停止しました。別の透過候補を選択してください。'};
+ return {rgba:output,status:'REVIEW_REQUIRED',method:'BORDER_CONNECTED_DUAL_THRESHOLD',removed,uncertain,locations,color,borderAgreement:agreement,thresholds:{strict:0,conservativeComparison:16},note:'外周につながり代表背景色と完全一致する部分だけを候補として透明化しました。閉じた背景・混合画素は保持。似た色の前景欠損や縁の残留は自動判別できません。元画像・alpha・明暗背景を全件確認してください。'};
+}
+function inspectSplit(rgba,w,h,rects){
+ requirePixels(rgba,w,h);
+ if(!rects.length||rects.length>40)throw Error('分割数は1〜40にしてください');
+ const owner=new Int8Array(w*h);owner.fill(-1);
+ for(let id=0;id<rects.length;id++){const r=rects[id];if(!Number.isInteger(r.x)||!Number.isInteger(r.y)||!Number.isInteger(r.width)||!Number.isInteger(r.height)||r.width<1||r.height<1||r.x<0||r.y<0||r.x+r.width>w||r.y+r.height>h)throw Error('分割範囲が不正です');for(let y=r.y;y<r.y+r.height;y++)for(let x=r.x;x<r.x+r.width;x++){const i=y*w+x;if(owner[i]!==-1)throw Error('分割範囲が重複しています');owner[i]=id;}}
+ if(owner.some(id=>id<0))throw Error('分割で未割当の画素があります');
+ const results=rects.map((_,i)=>({id:String(i+1).padStart(2,'0'),status:'REVIEW_REQUIRED',failures:[],warnings:[],locations:[],locationCount:0}));
+ for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+  const i=y*w+x;if(!rgba[i*4+3])continue;const id=owner[i],r=rects[id];
+  const atEdge=x===r.x||x===r.x+r.width-1||y===r.y||y===r.y+r.height-1;
+  if(atEdge){const outer=x===0||y===0||x===w-1||y===h-1,reason=outer?'SHEET_EDGE_CONTACT':'CELL_EDGE_CONTACT';const q=results[id];q.locationCount++;if(!q.failures.includes(reason))q.failures.push(reason);if(q.locations.length<100)q.locations.push({x:x-r.x,y:y-r.y,sheetX:x,sheetY:y,alpha:rgba[i*4+3],reason});}
+  if(atEdge)for(const [nx,ny]of [[x+1,y],[x-1,y+1],[x,y+1],[x+1,y+1]])if(nx>=0&&ny<h&&nx<w){const ni=ny*w+nx,other=owner[ni];if(other!==id&&rgba[ni*4+3])for(const index of [id,other]){if(!results[index].failures.includes('CROSS_CELL_FOREGROUND'))results[index].failures.push('CROSS_CELL_FOREGROUND');}}
+ }
+ return results.map((q,i)=>{if(q.failures.length)q.status='FAIL';q.locationsTruncated=q.locationCount>q.locations.length;q.nextAction=q.status==='FAIL'?'境界で画像が切れる、または隣の画像とつながる疑いがあります。行列を見直すか、画像間隔を広げた原寸PNGを取り込んで再診断してください。':'境界接触は検出しませんでした。別キャラの孤立片や生成時点の欠けは自動確定できません。元画像と見比べて確認してください。';return q;});
+}
+function foregroundBounds(rgba,w,h){requirePixels(rgba,w,h);let minX=w,minY=h,maxX=-1,maxY=-1;for(let i=0;i<w*h;i++)if(rgba[i*4+3]){const x=i%w,y=Math.floor(i/w);minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);}return maxX<0?null:{x:minX,y:minY,width:maxX-minX+1,height:maxY-minY+1};}
+function inspectCell(rgba,w,h,measuredGeometry=null){
+ const geometry=measuredGeometry||alphaEvidence(rgba,w,h),bounds=foregroundBounds(rgba,w,h),warnings=[];
+ if(geometry.componentCount>1)warnings.push({code:'DETACHED_COMPONENTS',message:`前景が${geometry.componentCount}か所に分かれています。耳・小物・文字なのか隣画像の混入なのか確認してください。`,bounds:geometry.components.map(c=>c.bounds)});
+ if(bounds&&Math.min(bounds.x,bounds.y,w-bounds.x-bounds.width,h-bounds.y-bounds.height)<2)warnings.push({code:'NEAR_CELL_EDGE',message:'前景がセル端の近くにあります。毛先や手足が欠けていないか確認してください。',bounds});
+ return {status:'REVIEW_REQUIRED',warnings,bounds,geometry};
+}
+function inspectTextLayer(rgba,w,h,expectedText,renderedLines,margin=10){
+ requirePixels(rgba,w,h);const failures=[],bounds=foregroundBounds(rgba,w,h);
+ if(renderedLines.join('')!==expectedText)failures.push('TEXT_EXACT_MISMATCH');
+ if(expectedText.trim()&&!bounds)failures.push('TEXT_EMPTY');
+ if(bounds&&(bounds.x<margin||bounds.y<margin||bounds.x+bounds.width>w-margin||bounds.y+bounds.height>h-margin))failures.push('TEXT_MARGIN_OR_CLIPPING');
+ return {status:failures.length?'FAIL':'PASS',failures,bounds,expectedText,renderedLines,scope:'機械描画の文字列一致と画素余白のみ。既存画像の文字OCR・誤字・フォント欠字は目視確認が必要。'};
+}
+const QUALITY_MESSAGES={SHEET_EDGE_CONTACT:'シート外周に前景が接触しています。欠けの疑いがあるため停止しました。',CELL_EDGE_CONTACT:'分割線に前景が接触しています。切断・隣画像混入の疑いがあるため停止しました。',CROSS_CELL_FOREGROUND:'分割線をまたぐ前景を検出しました。行列または元画像を修正してください。',NO_TRANSPARENCY:'背景が不透明です。透過候補を作成するか別のPNGを選択してください。',EMPTY_FOREGROUND:'キャラクターが見つかりません。透過で消えていないか元画像を確認してください。',VISIBLE_RGB_CHANGED:'残っている前景の色が元画像と変わっています。同じ原寸の候補を選択してください。'};
+
+// Original/candidate comparison is evidence of possible loss/residue. Background
+// similarity is never permission to remove a pixel or proof of semantic quality.
+function inspectMatteComparison(original,candidate,w,h){
+ requirePixels(original,w,h);requirePixels(candidate,w,h);
+ const border=borderIndices(w,h),opaqueBorder=border.filter(i=>original[i*4+3]===255);
+ const sourceHasAlpha=original.some((v,i)=>i%4===3&&v<255);
+ const color=[0,1,2].map(k=>{const samples=opaqueBorder.map(i=>original[i*4+k]).sort((a,b)=>a-b);return samples[Math.floor(samples.length/2)]??0;});
+ const uniform=opaqueBorder.length===border.length&&border.filter(i=>distanceAt(original,i,color)<=8).length/border.length>=0.98;
+ const counts={removedDetail:0,removedLowContrast:0,retainedBackgroundLike:0,addedOpacity:0},failures=[],warnings=[];
+ const locationsByReason={ADDED_FOREGROUND_OPACITY:[],REMOVED_SOURCE_DETAIL:[],REMOVED_LOW_CONTRAST_DETAIL:[],RETAINED_BACKGROUND_LIKE:[]};
+ for(let i=0;i<w*h;i++){
+  const p=i*4,removed=candidate[p+3]<original[p+3],dist=distanceAt(original,i,color);let reason=null;
+  if(candidate[p+3]>original[p+3]){counts.addedOpacity++;reason='ADDED_FOREGROUND_OPACITY';}
+  else if(removed&&original[p+3]>0&&(sourceHasAlpha||(uniform&&dist>16))){counts.removedDetail++;reason='REMOVED_SOURCE_DETAIL';}
+  else if(removed&&uniform&&dist>0){counts.removedLowContrast++;reason='REMOVED_LOW_CONTRAST_DETAIL';}
+  else if(uniform&&candidate[p+3]>0&&distanceAt(candidate,i,color)<=16){counts.retainedBackgroundLike++;reason='RETAINED_BACKGROUND_LIKE';}
+  if(reason&&locationsByReason[reason].length<100)locationsByReason[reason].push({x:i%w,y:Math.floor(i/w),reason,originalAlpha:original[p+3],candidateAlpha:candidate[p+3]});
+ }
+ if(counts.addedOpacity)failures.push('ADDED_FOREGROUND_OPACITY');
+ if(counts.removedDetail)failures.push('REMOVED_SOURCE_DETAIL');
+ const locations=Object.values(locationsByReason).flat().slice(0,100);
+ if(counts.removedLowContrast)warnings.push({code:'REMOVED_LOW_CONTRAST_DETAIL',message:`背景に近い色の${counts.removedLowContrast}画素が薄くなったか消えています。白い毛先・細線の誤消去がないか元画像と比較してください。`});
+ if(counts.retainedBackgroundLike)warnings.push({code:'RETAINED_BACKGROUND_LIKE',message:`背景色に近い${counts.retainedBackgroundLike}画素が残っています。正当な白い前景か背景残りかは未判定です。暗背景で確認してください。`});
+ return {status:failures.length?'FAIL':'REVIEW_REQUIRED',failures,warnings,counts,locations,locationsByReason,locationsTruncated:Object.values(counts).reduce((a,b)=>a+b,0)>locations.length,backgroundModel:uniform?{color,scope:'UNIFORM_BORDER_ESTIMATE'}:null,semanticQuality:'UNKNOWN',note:'座標はセル内原寸。元の半透明・薄色・細部の変化を比較する検査で、真のalphaや生成時の欠けを証明しません。'};
+}
+QUALITY_MESSAGES.REMOVED_SOURCE_DETAIL='元画像にあった毛先・細線などの前景を消した疑いがあります。元画像との比較位置を確認し、別の透過候補を取り込んでください。';
+const INPUT_LIMITS={maxPixels:8_000_000,maxDimension:8192,maxBytes:20*1024*1024,previewEdge:192};
+function validateInputDimensions(width,height){
+ if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||width*height>INPUT_LIMITS.maxPixels||width>INPUT_LIMITS.maxDimension||height>INPUT_LIMITS.maxDimension)throw Error('入力は800万画素以下、各辺8192px以下にしてください。原寸を確認し、スタンプ数を減らすか生成サイズを調整してください。');
+}
+
+QUALITY_MESSAGES.ADDED_FOREGROUND_OPACITY='元画像より不透明になった画素があります。透明背景の塗り戻り、または半透明の毛先が濃くなる変化（ハローの疑い）を検出したため停止しました。赤枠と原寸のalphaを比べ、元の透過を保つ候補PNGを選び直してください。';
+
+// src/specification.js
+// Conservative limits from the existing brief. Latest official page must be verified
+// separately; a passing binary check is not evidence of that verification.
+const LINE_SPEC={url:'https://creator.line.me/ja/guideline/sticker/',verification:'FETCH_BLOCKED',checkedAt:null,counts:COUNTS,sticker:{width:370,height:320},main:{width:240,height:240},tab:{width:96,height:74},maxPngBytes:1_000_000,maxZipBytes:60_000_000,minDpi:72,margin:10};
+const pngSignature=[137,80,78,71,13,10,26,10];
+function hasPngSignature(bytes){return bytes.length>=8&&pngSignature.every((b,i)=>bytes[i]===b);}
+function inspectPngBytes(bytes){
+ if(bytes.length<33||pngSignature.some((b,i)=>bytes[i]!==b))throw Error('PNG形式ではありません');
+ const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);let pos=8,width,height,colorType,bitDepth,dpi=null,idat=false,end=false;const chunks=[];
+ while(pos<bytes.length){if(pos+12>bytes.length)throw Error('PNGチャンクが途中で切れています');const length=view.getUint32(pos),stop=pos+length+12;if(stop>bytes.length)throw Error('PNGチャンク長が不正です');const type=String.fromCharCode(...bytes.slice(pos+4,pos+8));if(crc32(bytes.subarray(pos+4,stop-4))!==view.getUint32(stop-4))throw Error('PNG CRC不一致');
+  if(!chunks.length&&type!=='IHDR')throw Error('PNGヘッダーがありません');if(type==='IHDR'){if(chunks.length||length!==13)throw Error('PNGヘッダーが不正です');width=view.getUint32(pos+8);height=view.getUint32(pos+12);bitDepth=bytes[pos+16];colorType=bytes[pos+17];}
+  if(type==='pHYs'){if(length!==9)throw Error('PNG解像度情報が不正です');if(bytes[pos+16]===1)dpi={x:view.getUint32(pos+8)*0.0254,y:view.getUint32(pos+12)*0.0254};}
+  if(type==='IDAT')idat=true;chunks.push({type,start:pos,end:stop});pos=stop;
+  if(type==='IEND'){if(length||pos!==bytes.length)throw Error('PNG末尾が不正です');end=true;break;}
+ }
+ if(!end||!idat||!width||!height)throw Error('PNGデータが不足しています');
+ return {width,height,colorType,bitDepth,dpi,chunks};
+}
+function withPngResolution(bytes){
+ const info=inspectPngBytes(bytes),chunk=new Uint8Array(21),view=new DataView(chunk.buffer);view.setUint32(0,9);chunk.set([112,72,89,115],4);view.setUint32(8,2835);view.setUint32(12,2835);chunk[16]=1;view.setUint32(17,crc32(chunk.subarray(4,17)));
+ const parts=[bytes.subarray(0,8)];for(const c of info.chunks){if(c.type!=='pHYs')parts.push(bytes.subarray(c.start,c.end));if(c.type==='IHDR')parts.push(chunk);}
+ const result=new Uint8Array(parts.reduce((n,p)=>n+p.length,0));let offset=0;for(const p of parts){result.set(p,offset);offset+=p.length;}return result;
+}
+function validateAssetSpecification(name,bytes){
+ const info=inspectPngBytes(bytes),size=name==='main.png'?LINE_SPEC.main:name==='tab.png'?LINE_SPEC.tab:LINE_SPEC.sticker;
+ if(!/^(?:\d{2}|main|tab)\.png$/.test(name))throw Error('PNGファイル名が不正です');
+ if(info.width%2||info.height%2||info.width>size.width||info.height>size.height||((name==='main.png'||name==='tab.png')&&(info.width!==size.width||info.height!==size.height)))throw Error(`${name}: 規格寸法に一致しません`);
+ if(info.bitDepth!==8||info.colorType!==6)throw Error(`${name}: 8bit RGBA PNGが必要です`);
+ if(bytes.length>LINE_SPEC.maxPngBytes)throw Error(`${name}: 1MBを超えています`);
+ if(!info.dpi||info.dpi.x<72||info.dpi.y<72)throw Error(`${name}: 72dpi以上の解像度情報が必要です`);
+ return info;
+}
+function validateSubmissionArchive(zip,count){
+ if(!COUNTS.includes(count))throw Error('申請枚数が不正です');if(zip.length>LINE_SPEC.maxZipBytes)throw Error('ZIPが60MBを超えています');const files=readZip(zip);validateNames(files,count);for(const f of files)validateAssetSpecification(f.name,f.data);return files;
+}
+function submissionReadiness({items,assets,specificationEvidence,specification=LINE_SPEC}){
+ const reasons=[];
+ if(specification.verification!=='VERIFIED'||!specification.checkedAt)reasons.push('公式最新版は未照合です。申請可能とは判定できません。規格検査用ZIPで内容を確認してください。');
+ if(!specificationEvidence||specificationEvidence.status!=='DEVELOPER_VERIFIED'||specificationEvidence.url!==LINE_SPEC.url||!/^\d{4}-\d{2}-\d{2}$/.test(specificationEvidence.date||''))reasons.push('LINE公式の最新規格との照合が必要です。');
+ if(!COUNTS.includes(items.length))reasons.push('スタンプ枚数が不正です。');
+ for(const item of items){if(item.qc?.status!=='REVIEW_REQUIRED'||item.split?.status!=='REVIEW_REQUIRED'||item.comparison?.status==='FAIL')reasons.push(`${item.id}: 分割・透過検査に問題があります。`);if(!item.review||!item.reviewNote?.trim()||!item.contentReviewed)reasons.push(`${item.id}: 原本同一性・欠け・隣画像混入・透過の確認が未完了です。`);if(item.observations?.some(o=>o.disposition!=='HUMAN_ACCEPTED'))reasons.push(`${item.id}: 未解決の観測位置があります。`);}
+ if(assets.length!==items.length+2)reasons.push('個別PNG・main・tabが不足しています。');
+ for(const asset of assets){if(!asset.review||asset.layoutQC?.status!=='PASS')reasons.push(`${asset.name}: 最終サイズの文字・余白・品質確認が未完了です。`);}
+ return {allowed:reasons.length===0,reasons,qualityBasis:'MACHINE_CHECKS_AND_EXPLICIT_HUMAN_REVIEW',automaticSemanticPass:false};
+}
+
+// src/layout.js
+function layoutCanvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}
+function layoutPixels(c){return c.getContext('2d',{willReadFrequently:true}).getImageData(0,0,c.width,c.height).data;}
+function visibleCount(p){let n=0;for(let i=3;i<p.length;i+=4)if(p[i])n++;return n;}
+// Oversized reference layer proves that drawing into the final canvas did not
+// crop any rendered glyph pixels, including stroke and combining marks.
+function renderAsset(source,w,h,phrase=''){
+ const temporary=[];let output;try{
+ const bounds=foregroundBounds(layoutPixels(source),source.width,source.height);if(!bounds)throw Error('前景がありません');
+ output=layoutCanvas(w,h);const ctx=output.getContext('2d'),textHeight=phrase?80:0,scale=Math.min(1,(w-20)/bounds.width,(h-20-textHeight)/bounds.height),dw=Math.max(1,Math.round(bounds.width*scale)),dh=Math.max(1,Math.round(bounds.height*scale));
+ ctx.drawImage(source,bounds.x,bounds.y,bounds.width,bounds.height,Math.floor((w-dw)/2),Math.floor((h-textHeight-dh)/2),dw,dh);
+ let textQC={status:'PASS',failures:[],expectedText:'',renderedLines:[],scope:'NO_TEXT'},referencePixels=0,finalPixels=0;
+ if(phrase){
+  if(/[\p{Cc}]/u.test(phrase)||Array.from(phrase).some(c=>/\p{Cf}/u.test(c)&&c!=='\u200d'))throw Error('セリフに描画できない制御文字があります');
+  const graphemes=typeof Intl.Segmenter==='function'?Array.from(new Intl.Segmenter('ja',{granularity:'grapheme'}).segment(phrase),s=>s.segment):Array.from(phrase);
+  const reference=layoutCanvas(w+128,h+128);temporary.push(reference);const rctx=reference.getContext('2d');let lines=[],fontSize=30;
+  // Try two lines, retaining the exact sequence (no whitespace trimming).
+  for(;fontSize>=12;fontSize--){rctx.font=`bold ${fontSize}px sans-serif`;lines=[''];for(const char of graphemes){let index=lines.length-1;if(rctx.measureText(lines[index]+char).width>w-32&&lines[index]){lines.push(char);}else lines[index]+=char;}if(lines.length<=2)break;}
+  if(fontSize<12)throw Error('セリフを読みやすい大きさで収められません。短くしてください');
+  rctx.textAlign='center';rctx.textBaseline='middle';rctx.lineJoin='round';rctx.strokeStyle='#fff';rctx.lineWidth=5;rctx.fillStyle='#203c30';
+  lines.forEach((line,i)=>{const y=h-textHeight+(textHeight-lines.length*32)/2+16+i*32;rctx.strokeText(line,w/2+64,y+64);rctx.fillText(line,w/2+64,y+64);});
+  const layer=layoutCanvas(w,h);temporary.push(layer);layer.getContext('2d').drawImage(reference,-64,-64);const lp=layoutPixels(layer);referencePixels=visibleCount(layoutPixels(reference));finalPixels=visibleCount(lp);
+  textQC=inspectTextLayer(lp,w,h,phrase,lines,10);if(referencePixels!==finalPixels){textQC.status='FAIL';textQC.failures.push('TEXT_PIXELS_CLIPPED');}
+  if(textQC.status==='FAIL')throw Error('文字の欠け・余白不足を検出しました。セリフを短くして再加工してください');
+  ctx.drawImage(layer,0,0);
+ }
+ const finalBounds=foregroundBounds(layoutPixels(output),w,h),failures=[];
+ if(!finalBounds||Math.min(finalBounds.x,finalBounds.y,w-finalBounds.x-finalBounds.width,h-finalBounds.y-finalBounds.height)<10)failures.push('OUTPUT_MARGIN');
+ return {canvas:output,qc:{status:failures.length?'FAIL':'PASS',failures,sourceBounds:bounds,outputBounds:finalBounds,scale,text:{...textQC,referencePixels,finalPixels},semanticText:'HUMAN_REVIEW_REQUIRED',note:'文字列・描画画素・余白を検査。画像内の既存文字・フォント欠字・原本同一性は目視確認が必要。'}};
+ }catch(error){if(output){output.width=0;output.height=0;}throw error;}finally{for(const c of temporary){c.width=0;c.height=0;}}
+}
+
+// src/workflow.js
+// Navigation only. This module never approves images or changes quality state.
+function nextProductionStep({analyzing=false,busy=false,hasImage=false,hasPlan=false,items=[],assets=[],hasSavedZip=false,error=null}={}){
+ const nativeReady=i=>i.qc?.status==='REVIEW_REQUIRED'&&i.review===true&&Boolean(i.reviewNote?.trim())&&(i.observations||[]).every(o=>o.disposition==='HUMAN_ACCEPTED');
+ const reviewed=items.filter(nativeReady).length,finalReviewed=assets.filter(a=>a.review).length;
+ const progress=items.length?`原寸の確認 ${reviewed}/${items.length}枚${assets.length?`・最終PNGの確認 ${finalReviewed}/${assets.length}件`:''}`:'企画 → ChatGPTで生成 → 原寸画像の取込み → 品質確認 → PNG・ZIP保存';
+ const step=(kind,message,label,target,action='jump')=>({kind,message,label,target,action,progress});
+ if(analyzing||busy)return step('processing','画像を処理しています。このままお待ちください。中止して入力を見直すこともできます。','処理中',null,'wait');
+ if(error)return step('error',error.message,error.label||'入力を見直す',error.target||'#imageImport');
+ const bad=items.find(i=>i.qc?.status==='FAIL'||i.comparison?.status==='FAIL'||i.split?.status==='FAIL');
+ if(bad)return step('failed',`${bad.id}番に問題があります。赤枠と理由を確認し、行列または候補画像を見直して再診断してください。合格扱いにはしません。`,'問題の画像を確認',`#stamp-${bad.id}`);
+ if(!hasImage)return step('input',hasPlan?'ChatGPTで生成した原寸PNGを保存し、「生成した画像」で取り込んでください。':'マスター画像と希望から企画するか、生成済みの原寸画像を取り込んでください。',hasPlan?'生成画像を取り込む':'企画から始める',hasPlan?'#imageImport':'#planning');
+ if(!items.length)return step('analyze','原寸画像を選択しました。透過候補は省略できます。「透過と分割を診断」で確認へ進みます。','透過と分割を診断','#analyze','analyze');
+ const pending=items.find(i=>!nativeReady(i));
+ if(pending)return step('review',`${pending.id}番から元画像・alpha・明暗背景を比較し、確認結果を記入してください。不明な画像は確認済みにしません。`,'次の画像を確認',`#stamp-${pending.id}`);
+ if(!assets.length)return step('prepare','原寸の全件確認が揃いました。セリフ付きPNGとメイン・タブの最終プレビューを作ります。','最終PNGを作る','#prepare','prepare');
+ const final=assets.find(a=>!a.review);
+ if(final)return step('final-review',`${final.name}の文字・縁・余白を確認してください。全PNGの確認が揃うまでZIPは停止します。`,'次のPNGを確認',`#final-${final.name.replace('.png','')}`);
+ if(hasSavedZip)return step('saved','規格検査用ZIPを用意しました。保存が始まらなければ保存リンクをタップしてください。申請可否は公式照合が未完了のため未確認です。','保存リンクへ','#downloadLinks');
+ return step('export','全PNGの目視確認が揃いました。規格検査用ZIPを保存できます。申請可能という判定ではありません。','規格検査用ZIPを保存','#export','export');
+}
+
+// src/app.js
+const $=id=>document.getElementById(id);
+let items=[],generation=0,finalAssets=[],busy=false,revision=0,matteEvidence=null,analyzing=false,runMetrics=null,operationError=null;
+const evidenceState={sourceReview:'RECORDED_PRIVATELY',regressionInputs:'NOT_INCLUDED',externalValidation:'NOT_RUN',calibration:'UNVERIFIED'};
+function releaseCanvas(c){if(c){c.width=0;c.height=0;}}
+function releaseViews(element){for(const c of element.querySelectorAll('canvas'))releaseCanvas(c);element.replaceChildren();}
+function releaseItems(list){for(const i of list){releaseCanvas(i.original);releaseCanvas(i.candidate);}}
+function releaseAssets(list){for(const a of list)releaseCanvas(a.canvas);}
+const yieldToUI=()=>new Promise(resolve=>setTimeout(resolve,0));
+function clearFinal(){revision++;clearDownloads();releaseAssets(finalAssets);finalAssets=[];releaseViews($('finalCards'));$('exportStatus').textContent='';$('submissionStatus').textContent='';}
+function invalidate(){generation++;closeZoom();releaseItems(items);items=[];matteEvidence=null;runMetrics=null;operationError=null;clearFinal();releaseViews($('cards'));clearDownloads();$('diagnostic').disabled=true;$('evidence').disabled=true;$('status').textContent='入力変更 → 再診断が必要 → 承認無効 → ZIP停止';updateGate();}
+for(const id of ['count','cols','rows','phrases'])$(id).addEventListener('input',invalidate);
+const fileSelections=new Map();
+for(const id of ['original','candidate']){const changed=()=>{const file=$(id).files[0];if(fileSelections.get(id)===file)return;fileSelections.set(id,file);invalidate();};$(id).addEventListener('input',changed);$(id).addEventListener('change',changed);}
+$('official').addEventListener('change',()=>{specificationEvidence=$('official').checked?{status:'USER_VERIFIED',url:LINE_SPEC.url,date:new Date().toLocaleDateString('sv-SE'),basis:'利用者が公式ページを閲覧して表示規格との一致を確認した申告。開発環境からの取得は未完了。'}:null;updateGate();});
+let specificationEvidence=null;
+$('count').addEventListener('input',()=>{const [cols,rows]=gridPreset(Number($('count').value));$('cols').value=cols;$('rows').value=rows;});
+function nativeApproved(){return exportAllowed(items,true)&&items.every(i=>i.reviewNote.trim()&&i.observations.every(o=>o.disposition==='HUMAN_ACCEPTED'));}
+function submissionGate(){return submissionReadiness({items,assets:finalAssets,specificationEvidence});}
+function updateGate(){
+ $('demo').disabled=busy||analyzing;
+ $('cancelProcess').disabled=!busy&&!analyzing;
+ $('analyze').disabled=busy||analyzing;
+ $('prepare').disabled=busy||!nativeApproved();
+ $('export').disabled=busy||!nativeApproved()||!finalAssets.length||!finalAssets.every(a=>a.review);
+ $('submission').disabled=busy||!nativeApproved()||!submissionGate().allowed;
+ $('submissionStatus').textContent=submissionGate().allowed?'公式照合と検査の記録が揃っています。LINE審査の承認を保証するものではありません。':submissionGate().reasons.slice(0,3).join(' ');
+ updateNextStep();
+}
+function currentStep(){return nextProductionStep({analyzing,busy,hasImage:Boolean($('original').files[0]),hasPlan:Boolean(activePlan),items,assets:finalAssets,hasSavedZip:savedDownloads.some(d=>d.name==='trial-stickers-not-for-submission.zip'),error:operationError});}
+function updateNextStep(){const step=currentStep();$('nextAction').textContent=step.message;$('reviewProgress').textContent=step.progress;$('nextStep').textContent=step.label;$('nextStep').disabled=step.action==='wait';$('workflowGuide').dataset.state=step.kind;updateJourney(step);}
+$('nextStep').onclick=()=>{const step=currentStep();if(step.action==='wait')return;const target=document.querySelector(step.target);if(!target)return;if(step.action!=='jump'){target.click();return;}if(!target.matches('a[href],button,input,select,textarea,[tabindex]'))target.setAttribute('tabindex','-1');target.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});target.focus({preventScroll:true});};
+$('cancelProcess').onclick=()=>{if(!busy&&!analyzing)return;invalidate();$('status').textContent='処理を中止しました。画像の選択は残っています。入力を見直して再診断してください。';updateGate();};
+function canvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}
+function pixels(c){return c.getContext('2d',{willReadFrequently:true}).getImageData(0,0,c.width,c.height).data;}
+async function load(file){
+ if(!file)throw Error('原寸の元画像を選択してください。透過候補は省略できます');
+ if(file.size>INPUT_LIMITS.maxBytes)throw Error('入力は各20MB以下にしてください');
+ const head=new Uint8Array(await file.slice(0,24).arrayBuffer());
+ if(head.length>=24&&hasPngSignature(head)){const view=new DataView(head.buffer);validateInputDimensions(view.getUint32(16),view.getUint32(20));}
+ const url=URL.createObjectURL(file),image=new Image();
+ try{image.src=url;try{await image.decode();}catch{throw Error('画像を読み込めません。iPhoneの「ファイル」に原寸PNGまたはJPEGで保存して選び直してください。');}validateInputDimensions(image.naturalWidth,image.naturalHeight);const c=canvas(image.naturalWidth,image.naturalHeight);c.getContext('2d').drawImage(image,0,0);return c;}finally{image.src='';URL.revokeObjectURL(url);}
+}
+function crop(source,r){const c=canvas(r.width,r.height);c.getContext('2d').drawImage(source,r.x,r.y,r.width,r.height,0,0,r.width,r.height);return c;}
+function preview(source,type,bounded=false){
+ const scale=bounded?Math.min(1,INPUT_LIMITS.previewEdge/Math.max(source.width,source.height)):1;
+ const c=canvas(Math.max(1,Math.round(source.width*scale)),Math.max(1,Math.round(source.height*scale))),ctx=c.getContext('2d',{willReadFrequently:true});
+ if(type==='alpha'){ctx.drawImage(source,0,0,c.width,c.height);const data=ctx.getImageData(0,0,c.width,c.height);for(let i=0;i<data.data.length;i+=4){const a=data.data[i+3];data.data[i]=data.data[i+1]=data.data[i+2]=a;data.data[i+3]=255;}ctx.putImageData(data,0,0);}
+ else{if(type!=='元画像'){ctx.fillStyle=type==='暗背景'?'#181818':'#fff';ctx.fillRect(0,0,c.width,c.height);}ctx.drawImage(source,0,0,c.width,c.height);}
+ return c;
+}
+function text(tag,value){const el=document.createElement(tag);el.textContent=value;return el;}
+function viewsFor(entries,onPoint,findings=[],bounded=true){
+ const views=document.createElement('div');views.className='previews';
+ for(const [label,source] of entries){const figure=document.createElement('figure'),c=preview(source,label,bounded);
+  if(findings.length){const ctx=c.getContext('2d');ctx.strokeStyle='#d32f2f';ctx.lineWidth=2;for(const point of findings.slice(0,100)){const x=point.x*c.width/source.width,y=point.y*c.height/source.height;ctx.strokeRect(x-3,y-3,6,6);}}
+  figure.append(c,text('figcaption',label));
+  if(onPoint)c.addEventListener('click',event=>{const r=c.getBoundingClientRect();onPoint(Math.min(source.width-1,Math.floor((event.clientX-r.left)*source.width/r.width)),Math.min(source.height-1,Math.floor((event.clientY-r.top)*source.height/r.height)));});
+  views.append(figure);
+ }
+ return views;
+}
+function closeZoom(){const dialog=$('zoomDialog');if(dialog.open){if(typeof dialog.close==='function')dialog.close();else dialog.removeAttribute('open');}releaseViews($('zoomViews'));$('zoomTools').replaceChildren();}
+$('zoomClose').onclick=closeZoom;
+$('zoomDialog').addEventListener('close',()=>{if(!$('zoomDialog').open)releaseViews($('zoomViews'));});
+function openZoom(item){
+ closeZoom();$('zoomTitle').textContent=item.id+' — 印なし原寸（横にスクロールできます）';
+ const draw=label=>{releaseViews($('zoomViews'));$('zoomViews').append(viewsFor([[label,label==='元画像'?item.original:item.candidate]],null,[],false));};
+ for(const label of ['元画像','alpha','暗背景','明背景']){const button=text('button',label);button.type='button';button.onclick=()=>draw(label);$('zoomTools').append(button);}
+ draw('元画像');if(typeof $('zoomDialog').showModal==='function')$('zoomDialog').showModal();else $('zoomDialog').setAttribute('open','');
+}
+function nativeCard(item){
+ const card=document.createElement('article');card.className='card';card.id='stamp-'+item.id;card.tabIndex=-1;card.append(text('h3',`${item.id} ${item.phrase} — ${item.qc.status==='FAIL'?'問題あり・停止':'目視確認が必要'}`));
+ for(const code of item.qc.failures)card.append(text('p',QUALITY_MESSAGES[code]||code));
+ if(item.split.status==='FAIL')card.append(text('p',item.split.nextAction));
+ for(const warning of [...item.cell.warnings,...item.comparison.warnings])card.append(text('p',warning.message));
+ const positions=[...item.split.locations,...item.comparison.locations];if(positions.length)card.append(text('p','確認位置（セル左上が0,0）: '+positions.slice(0,6).map(p=>`(${p.x}, ${p.y})`).join('、')+(positions.length>6?' ほか。詳細は診断を開いてください。':'')));
+
+ if(item.matte)card.append(text('p',item.matte.note));
+ if(item.matte?.method==='BORDER_CONNECTED_DUAL_THRESHOLD')card.append(text('p',`透過候補（シート全体）: ${item.matte.removed}画素を透明化、曖昧な${item.matte.uncertain}画素は保持。元画像の耳・毛先・薄色部と比較してください。`));
+ const sampled=text('pre','画像をタップすると原寸座標のRGBA・合成値を表示します。');let selectedPoint=null;
+ card.append(viewsFor([['元画像',item.original],['alpha',item.candidate],['暗背景',item.candidate],['明背景',item.candidate]],(x,y)=>{
+  selectedPoint=samplePixel(pixels(item.original),pixels(item.candidate),item.candidate.width,item.candidate.height,x,y);sampled.textContent=JSON.stringify(selectedPoint,null,2);
+ },positions));
+ const zoom=text('button','印なしの原寸を開く');zoom.type='button';zoom.onclick=()=>openZoom(item);card.append(zoom,text('p','赤枠は検査の確認位置です。印なしの原寸で毛先・背景残りを比較してください。'),sampled);
+ const obsLabel=document.createElement('label');obsLabel.append(text('span','この位置の観測理由（欠損疑い・残留疑い・判別不能など）'));const obsNote=document.createElement('input');obsNote.type='text';obsNote.maxLength=300;obsLabel.append(obsNote);card.append(obsLabel);
+ const add=text('button','選択画素を要確認として記録');add.type='button';const observations=document.createElement('div');observations.className='observations';
+ add.onclick=()=>{if(!selectedPoint||!obsNote.value.trim()){sampled.textContent='先に画像の位置をタップし、観測理由を記入してください。';return;}
+  const observation={...selectedPoint,reason:obsNote.value.trim(),disposition:'UNKNOWN',resolutionNote:''};item.observations.push(observation);item.review=false;check.checked=false;clearFinal();
+  const row=document.createElement('div');row.append(text('p',`(${observation.x}, ${observation.y}) ${observation.reason} — UNKNOWN`));
+  const resolution=document.createElement('input');resolution.type='text';resolution.placeholder='元画像との比較結果と判断理由';resolution.maxLength=500;resolution.setAttribute('aria-label','観測位置の判断理由');
+  const accept=document.createElement('input');accept.type='checkbox';const acceptLabel=document.createElement('label');acceptLabel.className='check';acceptLabel.append(accept,document.createTextNode('この位置を目視確認して許容と判断（正解alphaの証明ではありません）'));
+  const changed=()=>{observation.resolutionNote=resolution.value;observation.disposition=accept.checked&&resolution.value.trim()?'HUMAN_ACCEPTED':'UNKNOWN';item.review=false;check.checked=false;clearFinal();updateGate();};resolution.oninput=changed;accept.onchange=changed;row.append(resolution,acceptLabel);observations.append(row);obsNote.value='';updateGate();
+ };card.append(add,observations);
+ const details=document.createElement('details');details.append(text('summary','alpha分布・連結成分・検出座標・次の操作'),text('pre',JSON.stringify({qc:item.qc,split:item.split,cell:item.cell,comparison:item.comparison,matte:item.matte},null,2)));card.append(details);
+ const noteLabel=document.createElement('label');noteLabel.append(text('span','確認結果・確認できない項目・不足する証拠'));const note=document.createElement('textarea');note.rows=2;note.maxLength=1000;note.className='review-note';noteLabel.append(note);card.append(noteLabel);
+ const check=document.createElement('input');check.type='checkbox';check.className='native-review';check.disabled=item.qc.status==='FAIL';
+ note.oninput=()=>{item.reviewNote=note.value;item.review=false;check.checked=false;clearFinal();updateGate();};
+ check.onchange=()=>{item.review=check.checked;clearFinal();updateGate();};
+ const label=document.createElement('label');label.className='check';label.append(check,document.createTextNode('元画像・alpha・明暗背景を比較し、欠損・残留がないと判断しました。不明ならチェックしません。確認結果の記入が必要です。'));card.append(label);
+ const contentCheck=document.createElement('input');contentCheck.type='checkbox';contentCheck.className='content-review';contentCheck.disabled=item.qc.status==='FAIL';contentCheck.onchange=()=>{item.contentReviewed=contentCheck.checked;updateGate();};
+ const contentLabel=document.createElement('label');contentLabel.className='check';contentLabel.append(contentCheck,document.createTextNode('申請用の追加確認：マスターと同じ外見で、耳・手足・尾が欠けず、隣のキャラの断片・不要な物・文字が混入していません。孤立片・透過の曖昧な部分も元画像と比較しました。'));card.append(contentLabel);return card;
+}
+$('analyze').onclick=async()=>{
+ analyzing=true;invalidate();const token=generation,started=performance.now(),next=[];let loadedOriginal=null,loadedCandidate=null;
+ try{
+  $('status').textContent='原寸画像を読込み中…';await yieldToUI();
+  const candidateFile=$('candidate').files[0];if(candidateFile&&!hasPngSignature(new Uint8Array(await candidateFile.slice(0,8).arrayBuffer())))throw Error('透過候補はPNG形式のファイルを選択してください。名前の拡張子だけを変更してもPNGにはなりません。');
+  const original=loadedOriginal=await load($('original').files[0]);if(token!==generation)return;let candidate;matteEvidence=null;
+  if(candidateFile){candidate=loadedCandidate=await load(candidateFile);}else{
+   $('status').textContent='透過候補を作成中。元画像の画素は保存します…';await yieldToUI();if(token!==generation)return;
+   const proposed=proposeMatte(pixels(original),original.width,original.height);const {rgba,...evidence}=proposed;matteEvidence=evidence;
+   if(proposed.status==='FAIL')throw Error(proposed.note);
+   candidate=loadedCandidate=canvas(original.width,original.height);candidate.getContext('2d').putImageData(new ImageData(rgba,original.width,original.height),0,0);
+  }if(token!==generation)return;
+  if(original.width!==candidate.width||original.height!==candidate.height)throw Error('元画像と候補の寸法が一致しません。リサイズせず同寸法で再取込みしてください');
+  const count=Number($('count').value),rects=gridRects(original.width,original.height,Number($('cols').value),Number($('rows').value),count),phrases=$('phrases').value.split('\n');
+  if(phrases.length>count||phrases.some(p=>Array.from(p).length>30))throw Error('セリフは各30文字以内、行数は枚数以内にしてください');
+  const splits=inspectSplit(pixels(candidate),candidate.width,candidate.height,rects);
+  runMetrics={sourcePixels:original.width*original.height,sourceDimensions:{width:original.width,height:original.height},previewEdge:INPUT_LIMITS.previewEdge};
+  for(let i=0;i<rects.length;i++){
+   if(token!==generation)return;
+   const r=rects[i],o=crop(original,r),c=crop(candidate,r),op=pixels(o),cp=pixels(c),nativeHash=await rgbaHash(cp,c.width,c.height);
+   const qc=diagnose(op,cp,r.width,r.height),split=splits[i],cell=inspectCell(cp,r.width,r.height,qc.geometry),comparison=inspectMatteComparison(op,cp,r.width,r.height);
+   if(comparison.status==='FAIL'){qc.status='FAIL';qc.failures.push(...comparison.failures);}
+   if(split.status==='FAIL'){qc.status='FAIL';qc.failures.push(...split.failures);}
+   next.push({id:String(i+1).padStart(2,'0'),phrase:phrases[i]||'',rect:r,original:o,candidate:c,nativeHash,originalHash:await rgbaHash(op,o.width,o.height),qc,split,cell,comparison,matte:matteEvidence,review:false,contentReviewed:false,reviewNote:'',observations:[]});
+   $('status').textContent=`原寸を診断中 ${i+1}/${rects.length}枚…`;await yieldToUI();
+  }
+  if(token!==generation)return;items=next;for(const item of items)$('cards').append(nativeCard(item));runMetrics.analysisMs=Math.round(performance.now()-started);
+  $('status').textContent=`分割 ${items.length}枚 / 機械検査FAIL ${items.filter(i=>i.qc.status==='FAIL').length}枚 / 欠け・混入・透過は全件目視確認待ち / 問題ありの画像は再取込みが必要`;
+  $('diagnostic').disabled=false;$('evidence').disabled=false;updateGate();
+ }catch(e){if(token===generation){operationError={message:e.message,target:'#imageImport'};$('status').textContent='停止: '+e.message;}}finally{releaseCanvas(loadedOriginal);releaseCanvas(loadedCandidate);if(items!==next)releaseItems(next);analyzing=false;updateGate();}
+};
+const savedDownloads=[];
+function clearDownloads(){for(const saved of savedDownloads){URL.revokeObjectURL(saved.url);saved.link.remove();}savedDownloads.length=0;}
+function download(data,name,type){
+ const url=URL.createObjectURL(new Blob([data],{type})),a=document.createElement('a');a.href=url;a.download=name;a.textContent=name+' を保存';a.className='download-link';$('downloadLinks').append(a);savedDownloads.push({url,link:a,name});
+ while(savedDownloads.length>3){const old=savedDownloads.shift();URL.revokeObjectURL(old.url);old.link.remove();}
+ a.click();updateNextStep();
+}
+function canvasResourceEstimate(){const seen=new Set([...document.querySelectorAll('canvas'),...items.flatMap(i=>[i.original,i.candidate]),...finalAssets.map(a=>a.canvas)]);return {retainedCanvasRgbaBytes:[...seen].reduce((n,c)=>n+c.width*c.height*4,0),scope:'現在保持するCanvasの幅×高さ×4。JS・デコード・GPU・一時配列・ブラウザのメモリは含まない。'};}
+function report(snapshot=items){return {schema:3,workflow:{split:'MEASURED_PER_ITEM',matte:'CANDIDATE_PLUS_HUMAN_REVIEW',text:'RASTER_AND_TEXT_EXACT_CHECK_PLUS_HUMAN_REVIEW',legacyV10Certified:false},createdAt:new Date().toISOString(),evidenceState,performance:runMetrics,resources:canvasResourceEstimate(),specification:LINE_SPEC,specificationEvidence,submissionReadiness:submissionGate(),matteEvidence,officialSpecification:'NOT_VERIFIED_BY_DEVELOPER',protocol:{scope:'LEGACY_V10_PROTOCOL_NOT_CERTIFIED',manifestSchemaVersion:'9.8',content:'NOT_RUN',separation:'NOT_RUN',matte:'UNVERIFIED',step2Overall:'UNVERIFIED',step3Allowed:false,generationCalls:0,acquisition:'USER_FILES_NOT_VERIFIED_AS_GENERATION_ORIGINAL',note:'均等分割と人間確認の試用モード。v10.0三ゲート総合PASSではありません。'},generation:'DISCONNECTED',hashFormat:'SHA-256: uint32 LE width, uint32 LE height, decoded canvas RGBA; not original-file bytes',items:snapshot.map(({id,phrase,rect,qc,split,cell,comparison,contentReviewed,review,reviewNote,observations,nativeHash,originalHash})=>({id,phrase,rect,qc,split,cell,comparison,contentReviewed,humanReviewed:review,reviewNote,observations,nativeHash,originalHash})),finalAssets:finalAssets.map(({name,width,height,review,sourceHash,outputHash,layoutQC})=>({name,width,height,humanReviewed:review,sourceHash,outputHash,layoutQC})),note:'座標はセル内原寸。合成・ハッシュ一致はMATTE品質の証明ではありません。'};}
+$('diagnostic').onclick=()=>download(JSON.stringify(report(),null,2),'matte-diagnostic.json','application/json');
+async function png(c){return new Uint8Array(await (await new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(Error('PNG変換失敗')),'image/png'))).arrayBuffer());}
+async function validatePng(data,w,h){
+ if(data.length>LINE_SPEC.maxPngBytes)throw Error('PNGが1MBを超えています');
+ const c=await load(new File([data],'check.png',{type:'image/png'}));if(c.width!==w||c.height!==h){releaseCanvas(c);throw Error('出力寸法不一致');}
+ const p=pixels(c);let clear=false,visible=false;for(let i=3;i<p.length;i+=4){if(p[i]===0)clear=true;if(p[i]>0)visible=true;}if(!clear||!visible){releaseCanvas(c);throw Error('透過または前景がありません');}return c;
+}
+async function verifyNative(snapshot){for(const i of snapshot)if(await rgbaHash(pixels(i.candidate),i.candidate.width,i.candidate.height)!==i.nativeHash)throw Error('native matteが変更されています。再取込みしてください');}
+$('prepare').onclick=async()=>{
+ clearFinal();const token=generation,revisionToken=revision,snapshot=items.slice(),next=[],started=performance.now();operationError=null;busy=true;updateGate();
+ try{
+  if(!nativeApproved())throw Error('全件の確認結果と品質確認が必要です');await document.fonts.ready;await verifyNative(snapshot);
+  const specs=[...snapshot.map(i=>({name:i.id+'.png',item:i,width:370,height:320,phrase:i.phrase})),{name:'main.png',item:snapshot[0],width:240,height:240},{name:'tab.png',item:snapshot[0],width:96,height:74}];
+  for(const spec of specs){let rendered;try{rendered=renderAsset(spec.item.candidate,spec.width,spec.height,spec.phrase);}catch(error){throw Error(`${spec.name}「${spec.phrase||'画像'}」: ${error.message}`);}if(rendered.qc.status!=='PASS'){releaseCanvas(rendered.canvas);throw Error(`${spec.name}: 余白・文字検査で問題を検出しました`);}let data;try{data=withPngResolution(await png(rendered.canvas));}finally{releaseCanvas(rendered.canvas);}validateAssetSpecification(spec.name,data);const decoded=await validatePng(data,spec.width,spec.height);next.push({name:spec.name,width:spec.width,height:spec.height,data,canvas:decoded,layoutQC:rendered.qc,sourceHash:spec.item.nativeHash,outputHash:await rgbaHash(pixels(decoded),decoded.width,decoded.height),review:false});$('exportStatus').textContent=`PNGを作成中 ${next.length}/${specs.length}件…`;await yieldToUI();if(token!==generation||revisionToken!==revision)throw Error('入力が変わりました。加工を中止しました');}
+  await verifyNative(snapshot);if(token!==generation||revisionToken!==revision||!nativeApproved())throw Error('入力または承認が変わりました');
+  finalAssets=next;if(runMetrics)runMetrics.prepareMs=Math.round(performance.now()-started);
+  for(const asset of finalAssets){const card=document.createElement('article');card.className='final-card';card.id='final-'+asset.name.replace('.png','');card.tabIndex=-1;card.append(text('h3',asset.name),text('p',`文字・余白の機械検査：${asset.layoutQC.status}。文字画素の欠けは未検出。フォントの欠字・誤字・読みやすさを確認してください。`),viewsFor([['暗背景',asset.canvas],['明背景',asset.canvas]]));
+   const savePng=text('button',asset.name+' を保存');savePng.type='button';savePng.disabled=true;savePng.onclick=()=>{if(asset.review&&nativeApproved()&&finalAssets.includes(asset))download(asset.data,asset.name,'image/png');};
+   const check=document.createElement('input');check.type='checkbox';check.className='final-review';check.onchange=()=>{asset.review=check.checked;savePng.disabled=!check.checked;updateGate();};const label=document.createElement('label');label.className='check';label.append(check,document.createTextNode('最終サイズで縁・余白と全ての文字を確認しました。文字の欠け、□への置換、誤字はありません。不明なら承認しません。'));card.append(label,savePng);$('finalCards').append(card);
+  }
+  $('exportStatus').textContent='加工完了。native matteとは別に、最終PNGを全件確認してください。';
+ }catch(e){if(token===generation){clearFinal();operationError={message:e.message,target:/文字|セリフ/.test(e.message)?'#phrases':'#qualityReview'};$('exportStatus').textContent='加工停止: '+e.message;}}finally{if(finalAssets!==next)releaseAssets(next);busy=false;updateGate();}
+};
+async function exportFiles(forSubmission=false){
+ const token=generation,revisionToken=revision,snapshot=items.slice(),assets=finalAssets.slice();operationError=null;busy=true;updateGate();
+ try{
+  if(!nativeApproved()||!assets.length||!assets.every(a=>a.review))throw Error('最終確認が不足しています');if(forSubmission&&!submissionGate().allowed)throw Error(submissionGate().reasons.join(' '));await verifyNative(snapshot);
+  const zip=zipStore(assets);if(zip.length>LINE_SPEC.maxZipBytes)throw Error('ZIPが60MBを超えています');const unpacked=forSubmission?validateSubmissionArchive(zip,snapshot.length):readZip(zip);validateNames(unpacked,snapshot.length);
+  for(let i=0;i<unpacked.length;i++){const f=unpacked[i],a=assets[i],decoded=await validatePng(f.data,a.width,a.height);try{if(await rgbaHash(pixels(decoded),a.width,a.height)!==a.outputHash)throw Error('最終確認済み画像とZIPが一致しません');}finally{releaseCanvas(decoded);}await yieldToUI();}
+  if(token!==generation||revisionToken!==revision||!nativeApproved()||finalAssets.length!==assets.length||finalAssets.some((a,i)=>a!==assets[i])||!assets.every(a=>a.review))throw Error('入力や承認が変わりました。再確認してください');
+  if(forSubmission&&!submissionGate().allowed)throw Error('申請用の確認が変更されました');
+  download(zip,forSubmission?'line-stickers-submission.zip':'trial-stickers-not-for-submission.zip','application/zip');$('exportStatus').textContent=forSubmission?'申請用ZIPを保存しました。全PNGの規格・CRC・確認画像との一致を再検査しました。公式規格と意味的品質は利用者による確認です。':'規格検査用ZIP内全PNGの機械検査完了・確認画像との一致確認。公式最新版との照合が未完了のため、申請可能とは判定していません。';
+ }catch(e){if(token===generation){operationError={message:e.message,target:'#qualityReview'};$('exportStatus').textContent='ZIP停止: '+e.message;}}finally{busy=false;updateGate();}
+};
+$('export').onclick=()=>exportFiles(false);
+$('submission').onclick=()=>exportFiles(true);
+$('evidence').onclick=async()=>{
+ const snapshot=items.slice(),token=generation,manifest=structuredClone(report(snapshot));busy=true;updateGate();$('evidence').disabled=true;
+ try{const files=[];let bytes=0;for(const i of snapshot){for(const [suffix,type]of [['original',null],['candidate',null],['alpha','alpha'],['dark','暗背景'],['light','明背景']]){if(token!==generation)throw Error('入力が変わりました。証拠保存を中止しました');const c=type?preview(i.candidate,type):i[suffix];let data;try{data=await png(c);}finally{if(type)releaseCanvas(c);}files.push({name:i.id+'-'+suffix+'.png',data});bytes+=data.length;if(bytes>LINE_SPEC.maxZipBytes)throw Error('診断証拠が60MBを超えました。枚数または原寸の大きさを調整してください');await yieldToUI();}}
+  if(token!==generation)throw Error('入力が変わりました。証拠保存を中止しました');
+  files.push({name:'diagnostic.json',data:new TextEncoder().encode(JSON.stringify({purpose:'QA_EVIDENCE_NOT_FOR_SUBMISSION',...manifest},null,2))});download(zipStore(files),'matte-evidence-not-for-submission.zip','application/zip');
+ }catch(e){$('status').textContent='診断保存失敗: '+e.message;}finally{busy=false;$('evidence').disabled=!items.length;updateGate();}
+};
+
+$('demo').onclick=async()=>{
+ if(busy||analyzing)return;busy=true;updateGate();
+ try{
+  const original=canvas(400,200),candidate=canvas(400,200),o=original.getContext('2d'),c=candidate.getContext('2d');o.fillStyle='#f2d7b1';o.fillRect(0,0,400,200);
+  for(let i=0;i<8;i++){const x=(i%4)*100+50,y=Math.floor(i/4)*100+50;for(const ctx of [o,c]){ctx.fillStyle=['#3b7756','#c4674d','#547bac','#926bac'][i%4];ctx.fillRect(x-24,y-24,48,48);}}
+  const files={original:new File([await png(original)],'demo-original.png',{type:'image/png'}),candidate:new File([await png(candidate)],'demo-candidate.png',{type:'image/png'})};
+  for(const id of ['original','candidate']){const transfer=new DataTransfer();transfer.items.add(files[id]);$(id).files=transfer.files;}
+  $('count').value='8';$('cols').value='4';$('rows').value='2';$('phrases').value='ありがとう\nおつかれさま';$('official').checked=false;specificationEvidence=null;resetPlan();saveDraft();
+  busy=false;updateGate();$('analyze').click();
+ }catch(e){operationError={message:'お試し画像の準備に失敗: '+e.message,target:'#imageImport'};$('status').textContent=operationError.message;}finally{busy=false;updateGate();}
+};
+
+// Planning is local and independent of image quality approval.
+let activePlan=null,masterURL=null;
+function resetPlan(){activePlan=null;$('planHandOff').hidden=true;$('planList').replaceChildren();$('generationPrompt').value='';$('copyPrompt').disabled=$('savePlan').disabled=true;$('planStatus').textContent='希望・枚数を変更しました。「企画を自動提案」で更新してください。';updateNextStep();}
+function saveDraft(){try{localStorage.setItem('asahi-planning-v1',JSON.stringify({wish:$('wish').value,identity:$('identity').value,count:$('count').value}));}catch{$('planStatus').textContent='端末への保存ができません。企画をファイルで保存してください。';}}
+for(const id of ['wish','identity','count'])$(id).addEventListener('input',()=>{resetPlan();saveDraft();});
+try{const draft=JSON.parse(localStorage.getItem('asahi-planning-v1')||'null');if(draft&&[8,16,24,32,40].includes(Number(draft.count))){$('wish').value=String(draft.wish||'').slice(0,500);$('identity').value=String(draft.identity||'').slice(0,500);$('count').value=draft.count;const [cols,rows]=gridPreset(Number(draft.count));$('cols').value=cols;$('rows').value=rows;}}catch{/* Storage is optional. */}
+$('master').onchange=async()=>{if(masterURL)URL.revokeObjectURL(masterURL);masterURL=null;$('masterPreview').hidden=true;try{const file=$('master').files[0];const checked=await load(file);releaseCanvas(checked);masterURL=URL.createObjectURL(file);$('masterPreview').src=masterURL;$('masterPreview').hidden=false;}catch(e){$('master').value='';$('planStatus').textContent=e.message;}};
+$('plan').onclick=()=>{try{
+ activePlan=createPlan({wish:$('wish').value,identity:$('identity').value,count:Number($('count').value)});
+ $('cols').value=activePlan.columns;$('rows').value=activePlan.rows;
+ renderPlanCards();$('planHandOff').hidden=false;
+ $('generationPrompt').value=generationPrompt(activePlan);$('copyPrompt').disabled=$('savePlan').disabled=false;
+ $('phrases').value=activePlan.items.map(i=>i.text).join('\n');invalidate();saveDraft();
+ $('planStatus').textContent=`${activePlan.count}個の企画を用意しました（${activePlan.direction}）。セリフは下の入力欄で調整できます。マスター画像をChatGPTに添付してください。`;
+}catch(e){$('planStatus').textContent=e.message;}};
+$('copyPrompt').onclick=async()=>{try{await navigator.clipboard.writeText($('generationPrompt').value);$('planStatus').textContent='コピーしました。ChatGPTでマスター画像と一緒に貼り付けてください。';}catch{$('generationPrompt').closest('details').open=true;$('generationPrompt').focus();$('generationPrompt').select();$('planStatus').textContent='コピーが許可されませんでした。選択された指示文を長押ししてコピーしてください。';}};
+$('savePlan').onclick=()=>{if(activePlan)download(JSON.stringify({plan:activePlan,prompt:generationPrompt(activePlan)},null,2),'stamp-project.json','application/json');};
+
+updateGate();
+
+
+/* Beginner studio navigation and editable idea cards. Quality and export gates remain unchanged. */
+function jumpToStudio(id){
+ const target=$(id);if(!target)return;
+ target.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+ if(target.tabIndex<0)target.tabIndex=-1;
+ target.focus({preventScroll:true});
+}
+function updateJourney(step){
+ const chosen=Boolean(activePlan),hasSheet=Boolean($('original').files[0]);
+ let stage=!chosen&&!hasSheet?'plan':!hasSheet?'create':!items.length?'import':!finalAssets.length?'review':'save';
+ if(step.kind==='failed'||step.kind==='review')stage='review';
+ if(['final-review','prepare','saved','export'].includes(step.kind))stage='save';
+ const order=['plan','create','import','review','save'],index=order.indexOf(stage);
+ document.querySelectorAll('[data-journey]').forEach(el=>{
+  const n=order.indexOf(el.dataset.journey);el.classList.toggle('is-active',n===index);el.classList.toggle('is-done',n<index);
+  if(n===index)el.setAttribute('aria-current','step');else el.removeAttribute('aria-current');
+ });
+ const q=$('qualitySimple');if(!q)return;
+ if(items.length){
+  const failed=items.filter(i=>i.qc.status==='FAIL').length,reviewed=items.filter(i=>i.review&&i.reviewNote.trim()).length;
+  q.textContent=failed? `全${items.length}枚のうち、${failed}枚に直す必要があるところが見つかりました。画像を確認して、問題があるものは元画像から作り直してください。`:`全${items.length}枚を取り込みました。機械検査で停止する画像はありません。仕上がりを確認済み：${reviewed}/${items.length}枚。すべて見てから次へ進めます。`;
+ }else q.textContent='画像を取り込むと、ここで1枚ずつ仕上がりを確認できます。';
+}
+function renderPlanCards(){
+ $('planList').replaceChildren();
+ for(const item of activePlan.items){
+  const card=document.createElement('p');card.className='plan-card';
+  const number=text('span',item.id+' / '+activePlan.count),phrase=text('strong',item.text||'セリフなし'),detail=text('span',item.expression+'・'+item.pose);
+  number.className='plan-number';phrase.className='plan-phrase';detail.className='plan-expression';
+  const edit=text('button','この案を編集');edit.type='button';edit.className='plan-edit';
+  const fields=document.createElement('span');fields.className='plan-fields';fields.hidden=true;
+  const entries=[['セリフ（空欄なら文字なし）','text',30],['表情','expression',100],['ポーズ','pose',120]];
+  const controls={};
+  for(const [caption,key,max]of entries){
+   const label=document.createElement('label');label.textContent=caption;
+   const input=document.createElement('input');input.type='text';input.maxLength=max;input.value=item[key];label.append(input);fields.append(label);controls[key]=input;
+  }
+  const apply=text('button','この内容に変更');apply.type='button';apply.onclick=()=>{
+   for(const [key,input]of Object.entries(controls))item[key]=input.value.trim();
+   phrase.textContent=item.text||'セリフなし';detail.textContent=item.expression+'・'+item.pose;
+   $('generationPrompt').value=generationPrompt(activePlan);
+   $('phrases').value=activePlan.items.map(i=>i.text).join('\n');
+   invalidate();saveDraft();fields.hidden=true;edit.textContent='この案を編集';
+   $('planStatus').textContent='変更を反映しました。画像生成の指示文も更新しています。';
+  };
+  edit.onclick=()=>{fields.hidden=!fields.hidden;edit.textContent=fields.hidden?'この案を編集':'編集を閉じる';if(!fields.hidden)controls.text.focus();};
+  fields.append(apply);card.append(number,phrase,detail,edit,fields);$('planList').append(card);
+ }
+}
+$('startFromMaster').onclick=()=>jumpToStudio('planning');
+$('startFromSheet').onclick=()=>jumpToStudio('imageImport');
+$('tryDemoJourney').onclick=()=>{$('demo').click();jumpToStudio('qualityReview');};
+$('journeyCopyPrompt').onclick=()=>$('copyPrompt').click();
+$('journeyImportSheet').onclick=()=>jumpToStudio('imageImport');
+updateJourney(currentStep());
+
+</script></body></html>
